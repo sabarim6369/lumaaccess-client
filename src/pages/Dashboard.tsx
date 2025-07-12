@@ -148,8 +148,20 @@ console.log(userId)
 mkdir %USERPROFILE%\\.lumaagent 2>nul
 echo { "userId": "${userId}" } > %USERPROFILE%\\.lumaagent\\config.json
 
-:: Launch the Electron agent (ensure it's in Downloads folder)
-start "" "%USERPROFILE%\\Downloads\\electron-agent.exe"
+:: Find the actual filename (first match)
+for %%f in ("%USERPROFILE%\\Downloads\\electron-agent*.exe") do (
+  set "agent=%%~f"
+  goto :found
+)
+
+echo Agent not found in Downloads folder.
+pause
+exit /b
+
+:found
+echo Launching agent at %agent%
+start "" "%agent%"
+
 `;
 
     const blob = new Blob([batContent], { type: "application/octet-stream" });
