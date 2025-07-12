@@ -37,6 +37,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { mockDevices, Device } from '@/lib/auth';
 import axios from 'axios';
+import Apiurl from './../api';
 const DeviceAccess = () => {
   const [searchParams] = useSearchParams();
   const deviceId = searchParams.get('device');
@@ -65,7 +66,7 @@ useEffect(() => {
       throw new Error("No device selected");
     }
 
-    const res = await axios.post("https://lumaaccess-server.onrender.com/send-command", {
+    const res = await axios.post(`${Apiurl}/api/device/send-command`, {
       deviceId: device.id,
       commandType: command,
     });

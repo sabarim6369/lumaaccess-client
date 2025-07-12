@@ -44,7 +44,9 @@ import Apiurl from './../api';
 const Dashboard = () => {
   const dispatch = useDispatch();
   // const devices = useSelector((state: RootState) => state.data.devices);
-  const [agentDownloaded, setAgentDownloadState] = useState(false);
+  const [agentDownloaded, setAgentDownloadState] = useState(()=>{
+    return localStorage.getItem("skip")==="true"?true:false
+  });
   const [devices, setDevices] = useState<Device[]>([]);
   const [requests, setRequests] = useState<AccessRequest[]>([]);
   const [activeConnections, setActiveConnections] = useState<Device[]>([]);
@@ -65,6 +67,11 @@ const Dashboard = () => {
       if (isMobile) {
       setAgentDownloadState(true); 
     } else {
+       const skip = localStorage.getItem("skip");
+  if (skip === "true") {
+    setAgentDownloadState(true);
+    return;
+  }
       const agentIsRunning = await hasDownloadedAgent(); 
       setAgentDownloadState(agentIsRunning);
     }
@@ -78,10 +85,11 @@ const Dashboard = () => {
 
   useEffect(() => {
     const fetchdata = async () => {
-      const res = await axios.get(
-        `${Apiurl}/devices`
-      );
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const userId = user.userId;
+      const res = await axios.get( `${Apiurl}/api/device/devices`,{params:{userid:userId}});
       setDevices(res.data);
+      console.log(res.data,"🤣🤣🤣🤣")
       localStorage.setItem("devices", JSON.stringify(res.data));
     };
     fetchdata();
@@ -91,7 +99,7 @@ const Dashboard = () => {
     const userAgent = window.navigator.userAgent.toLowerCase();
 
     if (platform.includes("win")) {
-      return "/downloads/luma-agent-win.exe";
+return "/electron-agent.exe";
     } else if (platform.includes("mac") || userAgent.includes("mac")) {
       return "/downloads/luma-agent-mac.dmg";
     } else if (userAgent.includes("linux")) {
@@ -102,33 +110,87 @@ const Dashboard = () => {
   };
 
   const handleDownloadAgent = () => {
-    const url = getPlatformDownloadURL();
+  const platform = window.navigator.platform.toLowerCase();
+  const userAgent = window.navigator.userAgent.toLowerCase();
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const userId = user.userId;
+console.log(userId)
+  if (!userId) {
+    toast({
+      title: "Login Required",
+      description: "Please log in before downloading the agent.",
+      variant: "destructive",
+    });
+    return;
+  }
 
-    if (!url) {
-      toast({
-        title: "Unsupported Platform",
-        description:
-          "We couldn't detect a supported OS. Please download manually.",
-        variant: "destructive",
-      });
-      return;
-    }
+  if (platform.includes("win")) {
+    const exeUrl = "/electron-agent.exe";
+    const exeLink = document.createElement("a");
+    exeLink.href = exeUrl;
+    exeLink.download = "electron-agent.exe";
+    document.body.appendChild(exeLink);
+    exeLink.click();
+    document.body.removeChild(exeLink);
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = url.split("/").pop(); // optional
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Step 2: Generate .bat content dynamically
+    const batContent = `
+@echo off
+:: Create config folder and write userId
+mkdir %USERPROFILE%\\.lumaagent 2>nul
+echo { "userId": "${userId}" } > %USERPROFILE%\\.lumaagent\\config.json
+
+:: Launch the Electron agent (ensure it's in Downloads folder)
+start "" "%USERPROFILE%\\Downloads\\electron-agent.exe"
+`;
+
+    const blob = new Blob([batContent], { type: "application/octet-stream" });
+    const batLink = document.createElement("a");
+    batLink.href = URL.createObjectURL(blob);
+    batLink.download = "launch-luma-agent.bat";
+    document.body.appendChild(batLink);
+    batLink.click();
+    document.body.removeChild(batLink);
+
+    toast({
+      title: "Launcher Downloaded",
+      description:
+        "Please run the 'launch-luma-agent.bat' file to complete the setup.",
+    });
 
     setAgentDownloaded();
     setAgentDownloadState(true);
+    return;
+  }
+
+  // macOS / Linux fallback
+  const fallbackUrl = getPlatformDownloadURL();
+  if (!fallbackUrl) {
     toast({
-      title: "Agent Downloaded",
+      title: "Unsupported Platform",
       description:
-        "Remote access agent has been downloaded. Please install it on your device.",
+        "We couldn't detect a supported OS. Please download manually.",
+      variant: "destructive",
     });
-  };
+    return;
+  }
+
+  const link = document.createElement("a");
+  link.href = fallbackUrl;
+  link.download = fallbackUrl.split("/").pop();
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  setAgentDownloaded();
+  setAgentDownloadState(true);
+  toast({
+    title: "Agent Downloaded",
+    description:
+      "Remote access agent has been downloaded. Please install it on your device.",
+  });
+};
+
 
   const handleSendRequest = (deviceId: string) => {
     const device = devices.find((d) => d.id === deviceId);
@@ -182,6 +244,10 @@ const Dashboard = () => {
       });
     }
   };
+const skipped = () => {
+  localStorage.setItem("skip", "true"); 
+  setAgentDownloadState(true);
+};
 
   const handleLogout = () => {
     logout();
@@ -283,37 +349,51 @@ const Dashboard = () => {
                   remotely
                 </CardDescription>
               </CardHeader>
+<CardContent className="text-center px-4 sm:px-6">
+  <div className="space-y-4 mb-6 max-w-md mx-auto">
+    {[
+      "Secure encrypted connections",
+      "Cross-platform compatibility",
+      "Real-time device monitoring",
+    ].map((text, idx) => (
+      <div
+        key={idx}
+        className="flex items-center justify-center space-x-2 text-muted-foreground"
+      >
+        <div className="w-2 h-2 bg-primary rounded-full"></div>
+        <span>{text}</span>
+      </div>
+    ))}
+  </div>
 
-              <CardContent className="text-center px-4 sm:px-6">
-                <div className="space-y-4 mb-6 max-w-md mx-auto">
-                  {[
-                    "Secure encrypted connections",
-                    "Cross-platform compatibility",
-                    "Real-time device monitoring",
-                  ].map((text, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-center space-x-2 text-muted-foreground"
-                    >
-                      <div className="w-2 h-2 bg-primary rounded-full"></div>
-                      <span>{text}</span>
-                    </div>
-                  ))}
-                </div>
+  <Button
+    onClick={handleDownloadAgent}
+    size="lg"
+    className="w-full h-14 bg-primary hover:bg-primary/90 font-semibold text-lg shadow-lg"
+  >
+    <Download className="mr-2 h-5 w-5" />
+    Download Agent
+  </Button>
 
-                <Button
-                  onClick={handleDownloadAgent}
-                  size="lg"
-                  className="w-full h-14 bg-primary hover:bg-primary/90 font-semibold text-lg shadow-lg"
-                >
-                  <Download className="mr-2 h-5 w-5" />
-                  Download Agent
-                </Button>
+  <p className="text-sm text-muted-foreground mt-4">
+    Already downloaded? <strong>Don’t forget to run the agent</strong> to link your device!
+  </p>
 
-                <p className="text-sm text-muted-foreground mt-4">
-                  Compatible with Windows, macOS, and Linux
-                </p>
-              </CardContent>
+  <Button
+  variant="ghost"
+  size="sm"
+  onClick={skipped}
+  className="mt-4 text-sm text-primary underline hover:no-underline"
+>
+  Skip for now
+</Button>
+
+
+  <p className="text-sm text-muted-foreground mt-2">
+    Compatible with Windows, macOS, and Linux
+  </p>
+</CardContent>
+
             </Card>
           </div>
         </div>
@@ -514,7 +594,7 @@ const Dashboard = () => {
   </div>
 
   <div className="w-full sm:w-auto sm:flex sm:items-center">
-    {device.status === "online" ? (
+    {device.status === "online" && device.statusType==="allowed" ? (
       <Button
         onClick={() => handleAccessDevice(device.id)}
         className="w-full sm:w-32 bg-primary hover:bg-primary/90 text-primary-foreground h-8 sm:h-9 text-xs sm:text-sm"

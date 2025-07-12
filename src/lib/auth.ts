@@ -14,6 +14,7 @@ export interface Device {
   os: string;
   status: 'online' | 'offline' | 'pending';
   lastSeen?: string;
+  statusType?: 'allowed' | 'requested_by_me' | 'shared_by_me'; // Optional, for more detailed status
 }
 
 export interface AccessRequest {
@@ -123,6 +124,7 @@ export const getCurrentUser = (): User | null => {
 export const hasDownloadedAgent = async (): Promise<boolean> => {
   try {
     const response = await fetch('http://localhost:5967/ping', { method: 'GET' });
+    console.log('Agent Ping Response:', response);
     if (!response.ok) return false;
     const data = await response.json();
     console.log('Agent Ping Response:', data);
