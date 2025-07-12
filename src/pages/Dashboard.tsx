@@ -48,6 +48,10 @@ const Dashboard = () => {
     return localStorage.getItem("skip")==="true"?true:false
   });
   const [devices, setDevices] = useState<Device[]>([]);
+  const [connecteddevices,setconnecteddevices]=useState<Device[]>([]);
+const [requesteddevices,setrequesteddevice]=useState<Device[]>([])
+const [incomingrequest,setincomingrequest]=useState<Device[]>([])
+
   const [requests, setRequests] = useState<AccessRequest[]>([]);
   const [activeConnections, setActiveConnections] = useState<Device[]>([]);
   const [showAllDevices, setShowAllDevices] = useState(false);
@@ -88,9 +92,13 @@ const Dashboard = () => {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
   const userId = user.userId;
       const res = await axios.get( `${Apiurl}/api/device/devices`,{params:{userid:userId}});
-      setDevices(res.data);
+      setDevices(res.data.allDevices);
+      setconnecteddevices(res.data.connected);
+      setrequesteddevice(res.data.requested_by_me);
+      setincomingrequest(res.data.requests);
+
       console.log(res.data,"🤣🤣🤣🤣")
-      localStorage.setItem("devices", JSON.stringify(res.data));
+      localStorage.setItem("devices", JSON.stringify(res.data.allDevices));
     };
     fetchdata();
   }, []);
@@ -192,21 +200,25 @@ start "" "%USERPROFILE%\\Downloads\\electron-agent.exe"
 };
 
 
-  const handleSendRequest = (deviceId: string) => {
-    const device = devices.find((d) => d.id === deviceId);
-    if (device) {
-      setDevices((prev) =>
-        prev.map((d) =>
-          d.id === deviceId ? { ...d, status: "pending" as const } : d
-        )
-      );
+ const handleSendRequest = async (deviceId, targetUserId) => {
+  try {
+    const user = JSON.parse(localStorage.getItem("user")); // assuming you store current user
+    const currentUserId = user?.userId;
 
-      toast({
-        title: "Request Sent",
-        description: `Access request sent to ${device.name}`,
-      });
-    }
-  };
+    const res = await axios.post(`${Apiurl}/api/device/send-request`, {
+      deviceId,
+      fromUserId: currentUserId,
+      toUserId: targetUserId,
+    });
+
+    toast({ title: "Request Sent" });
+    // Optionally refetch devices
+  } catch (err) {
+    console.error("Error sending request", err);
+    toast({ title: "Failed to send request", variant: "destructive" });
+  }
+};
+
 
   const handleAccessDevice = (deviceId: string) => {
     navigate(`/access?device=${deviceId}`);
@@ -400,6 +412,52 @@ const skipped = () => {
       </div>
     );
   }
+const renderActionButton = (device) => {
+  if (device.statusType === "allowed" && device.status === "online") {
+    return (
+      <Button
+        onClick={() => handleAccessDevice(device.id)}
+        className="w-full sm:w-32 bg-primary hover:bg-primary/90 text-primary-foreground h-8 sm:h-9 text-xs sm:text-sm"
+      >
+        Access <ChevronRight className="ml-1 h-3 w-3 sm:h-4 sm:w-4" />
+      </Button>
+    );
+  }
+
+  if (device.statusType === "requested_by_me") {
+    return (
+      <Button
+        variant="outline"
+        className="w-full sm:w-36 h-8 sm:h-9 text-xs sm:text-sm"
+        disabled
+      >
+        Request Pending
+      </Button>
+    );
+  }
+
+  if (device.statusType === "shared_by_me") {
+    return (
+      <Button
+        variant="secondary"
+        className="w-full sm:w-36 h-8 sm:h-9 text-xs sm:text-sm"
+        disabled
+      >
+        Your Device
+      </Button>
+    );
+  }
+
+  return (
+    <Button
+      onClick={() => handleSendRequest(device.id, device.userId)}
+      variant="outline"
+      className="w-full sm:w-36 h-8 sm:h-9 text-xs sm:text-sm"
+    >
+      Send Request
+    </Button>
+  );
+};
 
   const displayDevices = showAllDevices ? devices : devices;
 
@@ -503,14 +561,14 @@ const skipped = () => {
                   className="flex items-center justify-center space-x-1 sm:space-x-2 text-xs sm:text-sm whitespace-nowrap py-2 px-2 sm:px-3"
                 >
                   <Users className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline">Active Connections</span>
+                  <span className="hidden xs:inline">Connected Devices</span>
                   <span className="xs:hidden">Active</span>
-                  {activeConnections.length > 0 && (
+                  {connecteddevices.length > 0 && (
                     <Badge
                       variant="secondary"
                       className="ml-1 text-xs h-4 min-w-4 px-1"
                     >
-                      {activeConnections.length}
+                      {connecteddevices.length}
                     </Badge>
                   )}
                 </TabsTrigger>
@@ -594,24 +652,9 @@ const skipped = () => {
   </div>
 
   <div className="w-full sm:w-auto sm:flex sm:items-center">
-    {device.status === "online" && device.statusType==="allowed" ? (
-      <Button
-        onClick={() => handleAccessDevice(device.id)}
-        className="w-full sm:w-32 bg-primary hover:bg-primary/90 text-primary-foreground h-8 sm:h-9 text-xs sm:text-sm"
-      >
-        Access{" "}
-        <ChevronRight className="ml-1 h-3 w-3 sm:h-4 sm:w-4" />
-      </Button>
-    ) : (
-      <Button
-        onClick={() => handleSendRequest(device.id)}
-        variant="outline"
-        className="w-full sm:w-36 h-8 sm:h-9 text-xs sm:text-sm"
-        disabled={device.status === "pending"}
-      >
-        {device.status === "pending" ? "Request Pending" : "Send Request"}
-      </Button>
-    )}
+    {renderActionButton(device)}
+
+
   </div>
 </div>
 
@@ -620,8 +663,7 @@ const skipped = () => {
                 </ScrollArea>
               </TabsContent>
 
-              {/* Active Connections Tab */}
-              <TabsContent
+             <TabsContent
                 value="connections"
                 className="space-y-3 sm:space-y-4"
               >
@@ -630,17 +672,17 @@ const skipped = () => {
                     Active Connections
                   </h3>
                   <Badge variant="outline" className="text-emerald-600 text-xs">
-                    {activeConnections.length} active
+                    {connecteddevices.length} active
                   </Badge>
                 </div>
 
-                {activeConnections.length > 0 ? (
+                {connecteddevices.length > 0 ? (
                   <ScrollArea className="max-h-[350px] sm:max-h-[400px] lg:max-h-[500px] pr-1">
                     <div className="space-y-2 sm:space-y-3">
-                      {activeConnections.map((device) => (
+                      {connecteddevices.map((device) => (
                         <div
                           key={device.id}
-                          className="flex flex-col gap-3 p-3 sm:p-4 bg-muted/50 rounded-lg sm:rounded-xl border border-emerald-200 hover:bg-muted/80 w-full"
+                          className="flex flex-col sm:flex-row gap-3 p-3 sm:p-4 bg-muted/50 rounded-lg sm:rounded-xl border border-emerald-200 hover:bg-muted/80 w-full justify-center items-center"
                         >
                           <div className="flex items-start gap-3 w-full">
                             <div className="p-1.5 sm:p-2 bg-emerald-50 dark:bg-emerald-950 rounded-lg flex-shrink-0">
@@ -668,7 +710,7 @@ const skipped = () => {
                           </div>
                           <Button
                             onClick={() => handleAccessDevice(device.id)}
-                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-8 sm:h-9 text-xs sm:text-sm"
+                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-8 sm:h-9 text-xs sm:text-sm w-40"
                           >
                             Access{" "}
                             <ChevronRight className="ml-1 h-3 w-3 sm:h-4 sm:w-4" />
@@ -690,7 +732,6 @@ const skipped = () => {
                 )}
               </TabsContent>
 
-              {/* Requests Tab */}
               <TabsContent value="requests" className="space-y-3 sm:space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 flex-wrap">
                   <h3 className="text-base sm:text-lg font-semibold text-foreground">
