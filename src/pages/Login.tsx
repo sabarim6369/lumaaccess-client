@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { login } from '@/lib/auth';
 import { useAuth } from '@/contexts/AuthContext';
 import axios from 'axios';
+import Apiurl from './../api';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -48,7 +49,7 @@ const Login = () => {
   setIsLoading(true);
 
   try {
-    const res = await axios.post("http://localhost:8081/api/auth/login", {
+    const res = await axios.post(`${Apiurl}/api/auth/login`, {
       email,
       password,
     });

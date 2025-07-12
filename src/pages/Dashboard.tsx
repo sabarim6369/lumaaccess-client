@@ -40,7 +40,7 @@ import RequestCard from "@/components/RequestCard";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { setDevices } from "../Redux/Slices/Dataslice";
-
+import Apiurl from './../api';
 const Dashboard = () => {
   const dispatch = useDispatch();
   // const devices = useSelector((state: RootState) => state.data.devices);
@@ -79,7 +79,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchdata = async () => {
       const res = await axios.get(
-        "https://lumaaccess-server.onrender.com/devices"
+        `${Apiurl}/devices`
       );
       setDevices(res.data);
       localStorage.setItem("devices", JSON.stringify(res.data));

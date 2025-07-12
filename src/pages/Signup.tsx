@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { signup } from '@/lib/auth';
 import { useAuth } from '@/contexts/AuthContext';
 import axios from 'axios'
+import Apiurl from './../api';
 const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -64,7 +65,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   setIsLoading(true);
 
   try {
-    const res = await axios.post("http://localhost:8081/api/auth/signup", {
+    const res = await axios.post(`${Apiurl}/api/auth/signup`, {
       name: "James",
       email,
       password,
