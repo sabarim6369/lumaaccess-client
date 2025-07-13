@@ -66,8 +66,8 @@ useEffect(() => {
         const userId = user.userId;
 
         const res = await axios.post(`${Apiurl}/api/device/getallowedstuffs`, {
-          ownerId: userId,
-          targetId: targetid,
+          ownerId: targetid,
+          targetId: userId,
         });
 
     setPermissionData(res.data);

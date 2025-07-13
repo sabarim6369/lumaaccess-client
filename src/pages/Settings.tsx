@@ -93,7 +93,7 @@ const handleSave = async () => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     const userId = user.userId;
 
-    const response = await axios.post(`http://localhost:8081/api/device/updatepermission`, {
+    const response = await axios.post(`${Apiurl}/api/device/updatepermission`, {
       ownerId: userId,
       targetUserId: targetuserid,
       permissions,
