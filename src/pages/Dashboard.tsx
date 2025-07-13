@@ -60,6 +60,7 @@ const [incomingrequest,setincomingrequest]=useState<AccessRequest[]>([])
   const { user, setUser } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  
 
   // useEffect(() => {
   //   setAgentDownloadState(hasDownloadedAgent());
@@ -624,7 +625,7 @@ const renderActionButton = (device) => {
                 <Bell className="h-6 w-6 text-orange-600 dark:text-orange-400" />
               ),
               label: "Pending Requests",
-              value: requests?.length,
+              value: incomingrequest?.length,
               bg: "bg-orange-50 dark:bg-orange-950",
               iconWrapper: "p-3 rounded-xl",
             },
@@ -649,7 +650,6 @@ const renderActionButton = (device) => {
         <Card className="bg-card border-border shadow-xl w-full overflow-hidden rounded-lg mb-4 sm:mb-6">
           <CardContent className="px-2 py-3 sm:px-4 sm:py-6">
             <Tabs defaultValue="devices" className="space-y-3 sm:space-y-5">
-              {/* Tabs Header */}
               <TabsList className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2 w-full h-auto">
                 <TabsTrigger
                   value="devices"

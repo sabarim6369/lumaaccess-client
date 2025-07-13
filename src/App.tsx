@@ -9,14 +9,14 @@ import Signup from '@/pages/Signup';
 import Dashboard from '@/pages/Dashboard';
 import DeviceDetail from '@/pages/DeviceDetail';
 import DeviceAccess from '@/pages/DeviceAccess';
-import Settings from '@/pages/Settings';
+import Settingss from '@/pages/Settings';
 import NotFound from '@/pages/NotFound';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="App">
+        <div className="App app">
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
@@ -38,7 +38,7 @@ function App() {
             } />
             <Route path="/settings" element={
               // <ProtectedRoute>
-                <Settings />
+                <Settingss />
               // </ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />

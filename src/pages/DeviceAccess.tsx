@@ -45,20 +45,40 @@ const DeviceAccess = () => {
   const [isConnected, setIsConnected] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+const [permissionData, setPermissionData] = useState(null);
+
 
 useEffect(() => {
-  if (deviceId) {
-    const stored = localStorage.getItem("devices");
-    if (stored) {
-      const parsedDevices = JSON.parse(stored);
-      const foundDevice = parsedDevices.find((d: any) => d.id === deviceId);
-      if (foundDevice) {
-        setDevice(foundDevice);
+  const getdata = async () => {
+    if (deviceId) {
+      const stored = localStorage.getItem("devices");
+      if (stored) {
+        const parsedDevices = JSON.parse(stored);
+        console.log(parsedDevices[0].userId);
+        const targetid = parsedDevices[0].userId;
+
+        const foundDevice = parsedDevices.find((d: any) => d.id === deviceId);
+        if (foundDevice) {
+          setDevice(foundDevice);
+        }
+
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const userId = user.userId;
+
+        const res = await axios.post(`${Apiurl}/api/device/getallowedstuffs`, {
+          ownerId: userId,
+          targetId: targetid,
+        });
+
+    setPermissionData(res.data);
+
+        console.log(res);
       }
     }
-  }
-}, [deviceId]);
+  };
 
+  getdata();
+}, [deviceId]);
 
   const handleCommand = async (command: string) => {
   try {
@@ -84,17 +104,6 @@ useEffect(() => {
   }
 };
 
-
-  const handleDisconnect = () => {
-    setIsConnected(false);
-    toast({
-      title: "Disconnected",
-      description: `Disconnected from ${device?.name}`,
-      variant: "destructive",
-    });
-    setTimeout(() => navigate('/dashboard'), 1500);
-  };
-
   const controlActions = [
     { name: 'Shutdown', icon: Power, color: 'bg-red-600 hover:bg-red-700', description: 'Power off the device' },
     { name: 'Sleep', icon: Moon, color: 'bg-blue-600 hover:bg-blue-700', description: 'Put device to sleep' },
@@ -113,6 +122,26 @@ useEffect(() => {
     { name: 'Upload Files', icon: Upload, color: 'bg-green-500 hover:bg-green-600', description: 'Upload files' },
     { name: 'System Settings', icon: Settings, color: 'bg-violet-600 hover:bg-violet-700', description: 'Access settings' },
   ];
+const filteredActions = controlActions.filter((action) => {
+  if (!permissionData) return false;
+
+  const key = action.name
+    .replace(/\s+/g, '')              // remove spaces
+    .replace(/^[A-Z]/, (c) => c.toLowerCase()); // lowercase first char
+
+  return permissionData[key]; // true only if allowed
+});
+
+  const handleDisconnect = () => {
+    setIsConnected(false);
+    toast({
+      title: "Disconnected",
+      description: `Disconnected from ${device?.name}`,
+      variant: "destructive",
+    });
+    setTimeout(() => navigate('/dashboard'), 1500);
+  };
+
 
   if (!device) {
     return (
@@ -241,7 +270,6 @@ useEffect(() => {
           </CardContent>
         </Card>
 
-        {/* Control Actions */}
         <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
           <CardHeader>
             <CardTitle className="text-xl font-bold text-slate-800">Device Controls</CardTitle>
@@ -250,7 +278,7 @@ useEffect(() => {
           
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {controlActions.map((action) => (
+              {filteredActions.map((action) => (
                 <Button
                   key={action.name}
                   onClick={() => handleCommand(action.name)}

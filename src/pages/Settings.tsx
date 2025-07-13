@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Users, X } from 'lucide-react';
+import { ArrowLeft, Users, X,SquareChartGantt } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,18 +7,40 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import Apiurl from './../api';
-
+import {
+  Power, Moon, RotateCcw, Lock, Unlock, Image, Folder, Camera,
+  Volume2, VolumeX, Terminal, FileText, Eye, Download, Upload, Settings
+} from "lucide-react";
 interface AllowedUser {
   id: string;
   name: string;
   email: string;
 }
-
-const Settings = () => {
+const controlActions = [
+  { name: 'shutdown', icon: Power, color: 'bg-red-600 hover:bg-red-700', description: 'Power off the device' },
+  { name: 'sleep', icon: Moon, color: 'bg-blue-600 hover:bg-blue-700', description: 'Put device to sleep' },
+  { name: 'restart', icon: RotateCcw, color: 'bg-orange-600 hover:bg-orange-700', description: 'Restart the device' },
+  { name: 'lockScreen', icon: Lock, color: 'bg-purple-600 hover:bg-purple-700', description: 'Lock the screen' },
+  { name: 'unlockScreen', icon: Unlock, color: 'bg-green-600 hover:bg-green-700', description: 'Unlock the screen' },
+  { name: 'screenshot', icon: Image, color: 'bg-indigo-600 hover:bg-indigo-700', description: 'Capture screen' },
+  { name: 'accessFiles', icon: Folder, color: 'bg-yellow-600 hover:bg-yellow-700', description: 'Browse files' },
+  { name: 'openCamera', icon: Camera, color: 'bg-pink-600 hover:bg-pink-700', description: 'Access camera' },
+  { name: 'controlAudio', icon: Volume2, color: 'bg-teal-600 hover:bg-teal-700', description: 'Audio controls' },
+  { name: 'muteAudio', icon: VolumeX, color: 'bg-gray-600 hover:bg-gray-700', description: 'Mute all audio' },
+  { name: 'accessTerminal', icon: Terminal, color: 'bg-slate-800 hover:bg-slate-900', description: 'Command line access' },
+  { name: 'fileManager', icon: FileText, color: 'bg-cyan-600 hover:bg-cyan-700', description: 'Manage files' },
+  { name: 'screenShare', icon: Eye, color: 'bg-emerald-600 hover:bg-emerald-700', description: 'Share screen' },
+  { name: 'downloadFiles', icon: Download, color: 'bg-blue-500 hover:bg-blue-600', description: 'Download files' },
+  { name: 'uploadFiles', icon: Upload, color: 'bg-green-500 hover:bg-green-600', description: 'Upload files' },
+  { name: 'systemSettings', icon: Settings, color: 'bg-violet-600 hover:bg-violet-700', description: 'Access settings' },
+];
+const Settingss = () => {
   const [allowedUsers, setAllowedUsers] = useState<AllowedUser[]>([]);
   const { toast } = useToast();
   const navigate = useNavigate();
-
+  const [selected, setSelected] = useState<string[]>([]);
+const[openpopup,setopenpup]=useState(false);
+const[targetuserid,settargetuserid]=useState();
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     const userId = user.userId;
@@ -36,6 +58,67 @@ const Settings = () => {
 
     fetchAllowedUsers();
   }, []);
+const handleCheckboxChange = (name: string) => {
+  setSelected((prev) =>
+    prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
+  );
+};
+
+const allPermissionKeys = [
+  "shutdown",
+  "sleep",
+  "restart",
+  "lockScreen",
+  "unlockScreen",
+  "screenshot",
+  "accessFiles",
+  "openCamera",
+  "controlAudio",
+  "muteAudio",
+  "accessTerminal",
+  "fileManager",
+  "screenShare",
+  "downloadFiles",
+  "uploadFiles",
+  "systemSettings"
+];
+
+const handleSave = async () => {
+  const permissions = allPermissionKeys.reduce((acc, key) => {
+    acc[key] = selected.includes(key); // true if selected, false otherwise
+    return acc;
+  }, {} as Record<string, boolean>);
+
+  try {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const userId = user.userId;
+
+    const response = await axios.post(`http://localhost:8081/api/device/updatepermission`, {
+      ownerId: userId,
+      targetUserId: targetuserid,
+      permissions,
+    });
+
+    console.log("Permissions saved successfully:", response.data);
+   toast({
+  title: "Access Updated",
+  description: `Permissions updated for user.`,
+  variant: "default", // or "success" if you have custom variant
+});
+
+  } catch (error: any) {
+    console.error("Failed to save permissions:", error.response?.data || error.message);
+    toast({
+  title: "Update Failed",
+  description: "Could not update permissions. Please try again.",
+  variant: "destructive",
+});
+
+  }
+
+  setopenpup(false); // close popup
+};
+
 
 const handleDisconnect = async (targetUserId: string) => {
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
@@ -63,13 +146,16 @@ const handleDisconnect = async (targetUserId: string) => {
     });
   }
 };
+const handlemanageaccess=async(userid)=>{
+  settargetuserid(userid)
+  setopenpup(true);
 
+}
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto px-4 py-10 max-w-5xl space-y-8">
         
-        {/* Header */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-3xl font-bold">Device Access Settings</h1>
@@ -131,6 +217,15 @@ const handleDisconnect = async (targetUserId: string) => {
                       </div>
                     </div>
                     <Button
+                      onClick={() => handlemanageaccess(user.id)}
+                      variant="destructive"
+                      size="sm"
+                      className="flex items-center gap-2"
+                    >
+                      <SquareChartGantt className="h-4 w-4" />
+                      Manage Access
+                    </Button>
+                    <Button
                       onClick={() => handleDisconnect(user.id)}
                       variant="destructive"
                       size="sm"
@@ -154,8 +249,55 @@ const handleDisconnect = async (targetUserId: string) => {
           </CardContent>
         </Card>
       </div>
+   {openpopup && (
+  <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className="bg-white rounded-2xl shadow-2xl w-[90%] max-w-md p-6 space-y-6 max-h-[90vh] overflow-y-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b pb-3">
+        <h3 className="text-lg font-semibold text-gray-800">Manual Access Controls</h3>
+        <button
+          onClick={() => setopenpup(false)}
+          className="text-gray-500 hover:text-gray-800 transition"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div className="space-y-3 max-h-72 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300">
+        {controlActions.map((action) => (
+          <div
+            key={action.name}
+            className="flex items-center justify-between p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
+          >
+            <div className="flex items-center gap-3">
+              <div className={`p-1.5 rounded-md ${action.color}`}>
+                <action.icon className="h-4 w-4 text-white" />
+              </div>
+              <span className="text-sm font-medium text-gray-800">{action.name}</span>
+            </div>
+            <input
+              type="checkbox"
+              checked={selected.includes(action.name)}
+              onChange={() => handleCheckboxChange(action.name)}
+              className="w-4 h-4 accent-blue-600"
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Save Button */}
+      <button
+        onClick={handleSave}
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition"
+      >
+        Save
+      </button>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };
 
-export default Settings;
+export default Settingss;
