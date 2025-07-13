@@ -338,15 +338,27 @@ const skipped = () => {
   setAgentDownloadState(true);
 };
 
-  const handleLogout = () => {
+ const handleLogout = async () => {
+  try {
+    await axios.post(`${Apiurl}/api/auth/logout`, {}, { withCredentials: true });
     logout();
     setUser(null);
-    navigate("/login");
+    localStorage.removeItem("user");
+
     toast({
       title: "Logged out",
       description: "You have been successfully logged out.",
     });
-  };
+
+    navigate("/login");
+  } catch (error) {
+    toast({
+      title: "Logout failed",
+      description: "Something went wrong while logging out.",
+      variant: "destructive",
+    });
+  }
+};
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -566,7 +578,7 @@ const renderActionButton = (device) => {
   const displayDevices = showAllDevices ? devices : devices;
 
   return (
-    <div className="min-h-screen bg-background overflow-auto">
+    <div className="min-h-screen bg-background overflow-auto bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       <div className="container mx-auto px-4 py-4 sm:py-8 max-w-full sm:max-w-7xl">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
           <div>

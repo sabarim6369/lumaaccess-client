@@ -153,7 +153,7 @@ const handlemanageaccess=async(userid)=>{
 }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       <div className="container mx-auto px-4 py-10 max-w-5xl space-y-8">
         
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">

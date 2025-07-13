@@ -52,7 +52,7 @@ const Login = () => {
     const res = await axios.post(`${Apiurl}/api/auth/login`, {
       email,
       password,
-    });
+    },{withCredentials:true});
     const user = res.data;
 
     localStorage.setItem("user", JSON.stringify(user));
