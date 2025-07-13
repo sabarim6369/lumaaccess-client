@@ -13,47 +13,35 @@ import DeviceAccess from '@/pages/DeviceAccess';
 import Settingss from '@/pages/Settings';
 import NotFound from '@/pages/NotFound';
 import Apiurl from './api';
-
+import useAuthStore from "./Zustandstore/useAuthstore"
 interface JWTPayload {
   exp: number;
   userId: string;
   email: string;
 }
 
-function isTokenValid(token: string): boolean {
-  try {
-    const decoded = jwtDecode<JWTPayload>(token);
-    const currentTime = Math.floor(Date.now() / 1000);
-    return decoded.exp > currentTime;
-  } catch {
-    return false;
-  }
-}
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true); 
- 
+  const { isAuthenticated, setIsAuthenticated } = useAuthStore();
+  const [loading, setLoading] = useState<boolean>(true);
+
   useEffect(() => {
-      const currentPath = window.location.pathname;
-      if (currentPath === '/login' || currentPath === '/signup') {
-        setIsAuthenticated(true)
-    setLoading(false);
-    return;
-  }
+    const checkAuth = async () => {
+      try {
+        console.log("Checking auth...");
+        const res = await axios.get(`${Apiurl}/api/auth/me`, { withCredentials: true });
+        console.log("Authenticated", res.data);
+ setIsAuthenticated(true);   
+   } catch (err) {
+        console.error("Auth check failed", err);
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  axios.get(`${Apiurl}/api/auth/me`, { withCredentials: true })
-    .then((res) => {
-      setIsAuthenticated(true);
-    })
-    .catch(() => {
-      setIsAuthenticated(false);
-    })
-    .finally(() => {
-      setLoading(false);
-    });
-}, []);
-
+    checkAuth();
+  }, [setIsAuthenticated]);
 
   if (loading) {
     return <div className="flex items-center justify-center h-screen text-xl">Checking authentication...</div>;
@@ -65,12 +53,12 @@ function App() {
         <div className="App app">
           <Routes>
             <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/dashboard" />} />
+            <Route path="/signup" element={!isAuthenticated ? <Signup /> : <Navigate to="/dashboard" />} />
             <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />
             <Route path="/detail" element={isAuthenticated ? <DeviceDetail /> : <Navigate to="/login" />} />
             <Route path="/access" element={isAuthenticated ? <DeviceAccess /> : <Navigate to="/login" />} />
-            <Route path="/settings" element={<Settingss />} />
+            <Route path="/settings" element={isAuthenticated ? <Settingss /> : <Navigate to="/login" />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Toaster />

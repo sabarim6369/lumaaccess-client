@@ -41,6 +41,7 @@ import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { setDevices } from "../Redux/Slices/Dataslice";
 import Apiurl from './../api';
+import useAuthStore from "@/Zustandstore/useAuthstore";
 const Dashboard = () => {
   const dispatch = useDispatch();
   // const devices = useSelector((state: RootState) => state.data.devices);
@@ -48,7 +49,7 @@ const Dashboard = () => {
     return localStorage.getItem("skip")==="true"?true:false
   });
   const [downloadInitiated, setDownloadInitiated] = useState(false);
-
+const {setIsAuthenticated}=useAuthStore()
   const [devices, setDevices] = useState<Device[]>([]);
   const [connecteddevices,setconnecteddevices]=useState<Device[]>([]);
 const [requesteddevices,setrequesteddevice]=useState<Device[]>([])
@@ -344,7 +345,7 @@ const skipped = () => {
     logout();
     setUser(null);
     localStorage.removeItem("user");
-
+setIsAuthenticated(false)
     toast({
       title: "Logged out",
       description: "You have been successfully logged out.",

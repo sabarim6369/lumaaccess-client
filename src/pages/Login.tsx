@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { login } from '@/lib/auth';
 import { useAuth } from '@/contexts/AuthContext';
+import useAuthStore from '@/Zustandstore/useAuthstore';
 import axios from 'axios';
 import Apiurl from './../api';
 const Login = () => {
@@ -17,7 +18,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  
+  const {setIsAuthenticated}=useAuthStore()
   const navigate = useNavigate();
   const { toast } = useToast();
   const { setUser } = useAuth();
@@ -57,7 +58,7 @@ const Login = () => {
 
     localStorage.setItem("user", JSON.stringify(user));
     setUser(user);
-
+setIsAuthenticated(true)
     toast({
       title: "Welcome back!",
       description: "You have been successfully logged in.",
