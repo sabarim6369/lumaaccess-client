@@ -61,7 +61,8 @@ const [incomingrequest,setincomingrequest]=useState<AccessRequest[]>([])
   const { user, setUser } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  
+  const [userid,setuserid]=useState();
+const[loading,setloading]=useState(false);
 
   // useEffect(() => {
   //   setAgentDownloadState(hasDownloadedAgent());
@@ -90,9 +91,9 @@ const [incomingrequest,setincomingrequest]=useState<AccessRequest[]>([])
   setRequests(mockRequests);
   setActiveConnections(mockDevices.filter((d) => d.status === "online"));
 }, []);
-const [userid,setuserid]=useState();
   useEffect(() => {
     const fetchdata = async () => {
+      setloading(true);
       const user = JSON.parse(localStorage.getItem("user") || "{}");
   const userId = user.userId;
   setuserid(userId)
@@ -104,6 +105,7 @@ const [userid,setuserid]=useState();
 
       console.log(res.data,"🤣🤣🤣🤣")
       localStorage.setItem("devices", JSON.stringify(res.data.list));
+      setloading(false);
     };
     fetchdata();
   }, []);
@@ -734,7 +736,11 @@ const renderActionButton = (device) => {
 
                 <ScrollArea className="max-h-[280px] sm:max-h-[350px] lg:max-h-[450px] pr-1 overflow-y-auto scrollbar-none">
                   <div className="space-y-2 sm:space-y-3">
-                    {displayDevices?.map((device) => (
+                    {loading ? (
+  <div className="flex justify-center items-center w-full p-4">
+    <span className="text-white font-bold text-lg">Loading devices...</span>
+  </div>
+) : (displayDevices?.map((device) => (
                  <div
   key={device.id}
   className="flex flex-col sm:flex-row  gap-3 p-3 sm:p-4 bg-muted/50 rounded-lg sm:rounded-xl border border-border hover:bg-muted/80 transition-all w-full"
@@ -773,7 +779,7 @@ const renderActionButton = (device) => {
   </div>
 </div>
 
-                    ))}
+                    )))}
                   </div>
                 </ScrollArea>
               </TabsContent>
