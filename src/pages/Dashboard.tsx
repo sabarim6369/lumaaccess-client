@@ -47,10 +47,12 @@ const Dashboard = () => {
   const [agentDownloaded, setAgentDownloadState] = useState(()=>{
     return localStorage.getItem("skip")==="true"?true:false
   });
+  const [downloadInitiated, setDownloadInitiated] = useState(false);
+
   const [devices, setDevices] = useState<Device[]>([]);
   const [connecteddevices,setconnecteddevices]=useState<Device[]>([]);
 const [requesteddevices,setrequesteddevice]=useState<Device[]>([])
-const [incomingrequest,setincomingrequest]=useState<Device[]>([])
+const [incomingrequest,setincomingrequest]=useState<AccessRequest[]>([])
 
   const [requests, setRequests] = useState<AccessRequest[]>([]);
   const [activeConnections, setActiveConnections] = useState<Device[]>([]);
@@ -95,13 +97,44 @@ const [incomingrequest,setincomingrequest]=useState<Device[]>([])
       setDevices(res.data.allDevices);
       setconnecteddevices(res.data.connected);
       setrequesteddevice(res.data.requested_by_me);
-      setincomingrequest(res.data.requests);
+      setincomingrequest(res.data.incomingrequest);
 
       console.log(res.data,"🤣🤣🤣🤣")
       localStorage.setItem("devices", JSON.stringify(res.data.allDevices));
     };
     fetchdata();
   }, []);
+  const pingAgent = async (): Promise<boolean> => {
+  try {
+    const res = await fetch("http://localhost:5967/ping"); 
+    return res.ok;
+  } catch {
+    return false;
+  }
+};
+useEffect(() => {
+  if (!downloadInitiated) return;
+
+  const interval = setInterval(async () => {
+    const isRunning = await pingAgent();
+
+    if (isRunning) {
+      clearInterval(interval);
+      setAgentDownloadState(true);
+      setDownloadInitiated(false);
+      toast({
+        title: "Agent Connected",
+        description: "Your device is now live and ready to use!",
+      });
+
+      // Optionally notify backend via WebSocket here
+      // socket?.emit("agent-online", { userId: user.id });
+    }
+  }, 2000); // check every 2s
+
+  return () => clearInterval(interval);
+}, [downloadInitiated]);
+
   const getPlatformDownloadURL = () => {
     const platform = window.navigator.platform.toLowerCase();
     const userAgent = window.navigator.userAgent.toLowerCase();
@@ -179,7 +212,11 @@ start "" "%agent%"
     });
 
     setAgentDownloaded();
-    setAgentDownloadState(true);
+    setTimeout(()=>{
+    // setAgentDownloadState(true);
+setDownloadInitiated(true);
+
+    },4000)
     return;
   }
 
@@ -212,7 +249,7 @@ start "" "%agent%"
 };
 
 
- const handleSendRequest = async (deviceId, targetUserId) => {
+ const handleSendRequest = async (deviceId, targetUserId,devicename) => {
   try {
     const user = JSON.parse(localStorage.getItem("user")); // assuming you store current user
     const currentUserId = user?.userId;
@@ -221,6 +258,7 @@ start "" "%agent%"
       deviceId,
       fromUserId: currentUserId,
       toUserId: targetUserId,
+      deviceName:devicename
     });
 
     toast({ title: "Request Sent" });
@@ -374,49 +412,76 @@ const skipped = () => {
                 </CardDescription>
               </CardHeader>
 <CardContent className="text-center px-4 sm:px-6">
-  <div className="space-y-4 mb-6 max-w-md mx-auto">
-    {[
-      "Secure encrypted connections",
-      "Cross-platform compatibility",
-      "Real-time device monitoring",
-    ].map((text, idx) => (
-      <div
-        key={idx}
-        className="flex items-center justify-center space-x-2 text-muted-foreground"
-      >
-        <div className="w-2 h-2 bg-primary rounded-full"></div>
-        <span>{text}</span>
+  {downloadInitiated ? (
+    <>
+      <div className="flex flex-col items-center space-y-4">
+        <Download className="w-10 h-10 text-green-600" />
+        <p className="text-lg font-medium text-green-700">
+          Agent Downloaded Successfully
+        </p>
+      <p className="text-sm text-muted-foreground">
+  Please <strong className="text-red-600 font-bold">run the downloaded agent by double-clicking the <code>launch-luma-agent.bat</code> file</strong> to activate remote access on your system.
+</p>
+
+
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={skipped}
+          className="mt-2 text-sm text-primary underline hover:no-underline"
+        >
+          Skip for now
+        </Button>
       </div>
-    ))}
-  </div>
+    </>
+  ) : (
+    <>
+      <div className="space-y-4 mb-6 max-w-md mx-auto">
+        {[
+          "Secure encrypted connections",
+          "Cross-platform compatibility",
+          "Real-time device monitoring",
+        ]?.map((text, idx) => (
+          <div
+            key={idx}
+            className="flex items-center justify-center space-x-2 text-muted-foreground"
+          >
+            <div className="w-2 h-2 bg-primary rounded-full"></div>
+            <span>{text}</span>
+          </div>
+        ))}
+      </div>
 
-  <Button
-    onClick={handleDownloadAgent}
-    size="lg"
-    className="w-full h-14 bg-primary hover:bg-primary/90 font-semibold text-lg shadow-lg"
-  >
-    <Download className="mr-2 h-5 w-5" />
-    Download Agent
-  </Button>
+      <Button
+        onClick={handleDownloadAgent}
+        size="lg"
+        className="w-full h-14 bg-primary hover:bg-primary/90 font-semibold text-lg shadow-lg"
+      >
+        <Download className="mr-2 h-5 w-5" />
+        Download Agent
+      </Button>
 
-  <p className="text-sm text-muted-foreground mt-4">
-    Already downloaded? <strong>Don’t forget to run the agent</strong> to link your device!
-  </p>
+      <p className="text-sm text-muted-foreground mt-4">
+        Already downloaded?{" "}
+        <strong className="text-red-600">Don’t forget to run the agent</strong> to link your device!
+      </p>
 
-  <Button
-  variant="ghost"
-  size="sm"
-  onClick={skipped}
-  className="mt-4 text-sm text-primary underline hover:no-underline"
->
-  Skip for now
-</Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={skipped}
+        className="mt-4 text-sm text-primary underline hover:no-underline"
+      >
+        Skip for now
+      </Button>
 
-
-  <p className="text-sm text-muted-foreground mt-2">
-    Compatible with Windows, macOS, and Linux
-  </p>
+      <p className="text-sm text-muted-foreground mt-2">
+        Compatible with Windows, macOS, and Linux
+      </p>
+    </>
+  )}
 </CardContent>
+
 
             </Card>
           </div>
@@ -462,7 +527,7 @@ const renderActionButton = (device) => {
 
   return (
     <Button
-      onClick={() => handleSendRequest(device.id, device.userId)}
+      onClick={() => handleSendRequest(device.id, device.userId,device.name)}
       variant="outline"
       className="w-full sm:w-36 h-8 sm:h-9 text-xs sm:text-sm"
     >
@@ -515,7 +580,7 @@ const renderActionButton = (device) => {
                 <Monitor className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               ),
               label: "Total Devices",
-              value: devices.length,
+              value: devices?.length,
               bg: "bg-blue-50 dark:bg-blue-950",
               iconWrapper: "p-3 rounded-xl",
             },
@@ -524,7 +589,7 @@ const renderActionButton = (device) => {
                 <Users className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
               ),
               label: "Active Connections",
-              value: activeConnections.length,
+              value: activeConnections?.length,
               bg: "bg-emerald-50 dark:bg-emerald-950",
               iconWrapper: "p-3 rounded-xl",
             },
@@ -533,11 +598,11 @@ const renderActionButton = (device) => {
                 <Bell className="h-6 w-6 text-orange-600 dark:text-orange-400" />
               ),
               label: "Pending Requests",
-              value: requests.length,
+              value: requests?.length,
               bg: "bg-orange-50 dark:bg-orange-950",
               iconWrapper: "p-3 rounded-xl",
             },
-          ].map(({ icon, label, value, bg, iconWrapper }, idx) => (
+          ]?.map(({ icon, label, value, bg, iconWrapper }, idx) => (
             <Card key={idx} className="bg-card border-border shadow-lg w-full">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4">
@@ -575,12 +640,12 @@ const renderActionButton = (device) => {
                   <Users className="h-3 w-3 sm:h-4 sm:w-4" />
                   <span className="hidden xs:inline">Connected Devices</span>
                   <span className="xs:hidden">Active</span>
-                  {connecteddevices.length > 0 && (
+                  {connecteddevices?.length > 0 && (
                     <Badge
                       variant="secondary"
                       className="ml-1 text-xs h-4 min-w-4 px-1"
                     >
-                      {connecteddevices.length}
+                      {connecteddevices?.length}
                     </Badge>
                   )}
                 </TabsTrigger>
@@ -591,12 +656,12 @@ const renderActionButton = (device) => {
                   <Bell className="h-3 w-3 sm:h-4 sm:w-4" />
                   <span className="hidden xs:inline">Incoming Requests</span>
                   <span className="xs:hidden">Requests</span>
-                  {requests.length > 0 && (
+                  {incomingrequest?.length > 0 && (
                     <Badge
                       variant="secondary"
                       className="ml-1 bg-orange-100 text-orange-800 text-xs h-4 min-w-4 px-1"
                     >
-                      {requests.length}
+                      {incomingrequest?.length}
                     </Badge>
                   )}
                 </TabsTrigger>
@@ -613,9 +678,9 @@ const renderActionButton = (device) => {
                       variant="outline"
                       className="text-muted-foreground text-xs"
                     >
-                      {devices.length} devices
+                      {devices?.length} devices
                     </Badge>
-                    {devices.length > 3 && (
+                    {devices?.length > 3 && (
                       <Button
                         variant="outline"
                         size="sm"
@@ -631,7 +696,7 @@ const renderActionButton = (device) => {
 
                 <ScrollArea className="max-h-[350px] sm:max-h-[400px] lg:max-h-[500px] pr-1">
                   <div className="space-y-2 sm:space-y-3">
-                    {displayDevices.map((device) => (
+                    {displayDevices?.map((device) => (
                  <div
   key={device.id}
   className="flex flex-col sm:flex-row  gap-3 p-3 sm:p-4 bg-muted/50 rounded-lg sm:rounded-xl border border-border hover:bg-muted/80 transition-all w-full"
@@ -684,14 +749,14 @@ const renderActionButton = (device) => {
                     Active Connections
                   </h3>
                   <Badge variant="outline" className="text-emerald-600 text-xs">
-                    {connecteddevices.length} active
+                    {connecteddevices?.length} active
                   </Badge>
                 </div>
 
-                {connecteddevices.length > 0 ? (
+                {connecteddevices?.length > 0 ? (
                   <ScrollArea className="max-h-[350px] sm:max-h-[400px] lg:max-h-[500px] pr-1">
                     <div className="space-y-2 sm:space-y-3">
-                      {connecteddevices.map((device) => (
+                      {connecteddevices?.map((device) => (
                         <div
                           key={device.id}
                           className="flex flex-col sm:flex-row gap-3 p-3 sm:p-4 bg-muted/50 rounded-lg sm:rounded-xl border border-emerald-200 hover:bg-muted/80 w-full justify-center items-center"
@@ -750,24 +815,74 @@ const renderActionButton = (device) => {
                     Incoming Requests
                   </h3>
                   <Badge variant="outline" className="text-orange-600 text-xs">
-                    {requests.length} pending
+                    {incomingrequest?.length} pending
                   </Badge>
                 </div>
 
-                {requests.length > 0 ? (
-                  <ScrollArea className="max-h-[350px] sm:max-h-[400px] lg:max-h-[500px] pr-1">
-                    <div className="grid grid-cols-1 gap-3 sm:gap-4">
-                      {requests.map((request) => (
-                        <RequestCard
-                          key={request.id}
-                          request={request}
-                          onAccept={handleAcceptRequest}
-                          onReject={handleRejectRequest}
-                        />
-                      ))}
-                    </div>
-                  </ScrollArea>
-                ) : (
+             {incomingrequest?.length > 0 ? (
+  <ScrollArea className="max-h-[350px] sm:max-h-[400px] lg:max-h-[500px] pr-1">
+    <div className="grid grid-cols-1 gap-3 sm:gap-4">
+      {incomingrequest?.map((device) => (
+        <div
+          key={device.id}
+          className="flex flex-col sm:flex-row gap-3 p-3 sm:p-4 bg-muted/50 rounded-lg sm:rounded-xl border border-emerald-200 hover:bg-muted/80 w-full justify-between items-center"
+        >
+          {/* Device Info + Sender Info */}
+          <div className="flex items-start gap-3 w-full flex-1">
+            <div className="p-1.5 sm:p-2 bg-emerald-50 dark:bg-emerald-950 rounded-lg flex-shrink-0">
+              <Monitor className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 dark:text-emerald-400" />
+            </div>
+
+            <div className="flex-1 overflow-hidden min-w-0">
+              <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-1">
+                <h4 className="font-semibold text-sm sm:text-lg truncate">
+                  {device.name}
+                </h4>
+                <Wifi className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-600" />
+                <Badge className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs">
+                  Incoming Request
+                </Badge>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
+                <span>{device.os}</span>
+                {device.hostname && (
+                  <span className="hidden sm:inline">• {device.hostname}</span>
+                )}
+              </div>
+
+              {/* 👤 Sender Info */}
+              {device.senderInfo && (
+                <div className="mt-2 text-xs sm:text-sm text-foreground">
+                  <p className="font-medium">
+                    Request from: {device.senderInfo.name || "Unknown User"}
+                  </p>
+                  <p className="text-muted-foreground">{device.senderInfo.email}</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Buttons */}
+          <div className="flex flex-col gap-2 sm:gap-2 sm:items-end w-full sm:w-auto sm:ml-4">
+            <Button
+              onClick={() => handleAcceptRequest(device.id, device.senderInfo?.id)}
+              className="w-full sm:w-32 bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm h-8"
+            >
+              Accept
+            </Button>
+            <Button
+              onClick={() => handleRejectRequest(device.id, device.senderInfo?.id)}
+              className="w-full sm:w-32 bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm h-8"
+            >
+              Reject
+            </Button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </ScrollArea>
+) : (
                   <div className="text-center py-8 sm:py-12">
                     <Bell className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />
                     <h4 className="text-base sm:text-lg font-medium text-foreground mb-2">
