@@ -37,6 +37,7 @@ function App() {
   useEffect(() => {
       const currentPath = window.location.pathname;
       if (currentPath === '/login' || currentPath === '/signup') {
+        setIsAuthenticated(true)
     setLoading(false);
     return;
   }
