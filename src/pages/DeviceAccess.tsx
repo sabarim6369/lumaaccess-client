@@ -65,10 +65,13 @@ useEffect(() => {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const userId = user.userId;
 
-        const res = await axios.post(`${Apiurl}/api/device/getallowedstuffs`, {
-          ownerId: targetid,
-          targetId: userId,
-        });
+          const res = await axios.post(`${Apiurl}/api/device/getallowedstuffs`, {
+            ownerId: targetid,
+            targetId: userId,
+          },{
+              withCredentials: true,
+
+          });
 
     setPermissionData(res.data);
 
@@ -89,7 +92,8 @@ useEffect(() => {
     const res = await axios.post(`${Apiurl}/api/device/send-command`, {
       deviceId: device.id,
       commandType: command,
-    });
+    },{  withCredentials: true,
+});
 
     toast({
       title: "Command Executed",

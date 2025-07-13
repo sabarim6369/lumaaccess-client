@@ -97,7 +97,8 @@ const[loading,setloading]=useState(false);
       const user = JSON.parse(localStorage.getItem("user") || "{}");
   const userId = user.userId;
   setuserid(userId)
-      const res = await axios.get( `${Apiurl}/api/device/devices`,{params:{userid:userId}});
+      const res = await axios.get( `${Apiurl}/api/device/devices`,{params:{userid:userId},  withCredentials: true
+});
       setDevices(res.data.list);
       setconnecteddevices(res.data.connectedevice);
       setrequesteddevice(res.data.requested_by_me);
@@ -343,7 +344,7 @@ const skipped = () => {
 
  const handleLogout = async () => {
   try {
-    await axios.post(`${Apiurl}/api/auth/logout`, {}, { withCredentials: true });
+    // await axios.post(`${Apiurl}/api/auth/logout`, {}, { withCredentials: true });
     logout();
     setUser(null);
     localStorage.removeItem("user");
