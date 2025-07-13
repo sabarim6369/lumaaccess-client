@@ -88,19 +88,20 @@ const [incomingrequest,setincomingrequest]=useState<AccessRequest[]>([])
   setRequests(mockRequests);
   setActiveConnections(mockDevices.filter((d) => d.status === "online"));
 }, []);
-
+const [userid,setuserid]=useState();
   useEffect(() => {
     const fetchdata = async () => {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
   const userId = user.userId;
+  setuserid(userId)
       const res = await axios.get( `${Apiurl}/api/device/devices`,{params:{userid:userId}});
-      setDevices(res.data);
-      setconnecteddevices(res.data.connected);
+      setDevices(res.data.list);
+      setconnecteddevices(res.data.connectedevice);
       setrequesteddevice(res.data.requested_by_me);
       setincomingrequest(res.data.incomingrequest);
 
       console.log(res.data,"🤣🤣🤣🤣")
-      localStorage.setItem("devices", JSON.stringify(res.data.allDevices));
+      localStorage.setItem("devices", JSON.stringify(res.data.list));
     };
     fetchdata();
   }, []);
@@ -249,16 +250,16 @@ setDownloadInitiated(true);
 };
 
 
- const handleSendRequest = async (deviceId, targetUserId,devicename) => {
+ const handleSendRequest = async (targetUserId) => {
   try {
     const user = JSON.parse(localStorage.getItem("user")); // assuming you store current user
     const currentUserId = user?.userId;
 
     const res = await axios.post(`${Apiurl}/api/device/send-request`, {
-      deviceId,
+      
       fromUserId: currentUserId,
       toUserId: targetUserId,
-      deviceName:devicename
+     
     });
 
     toast({ title: "Request Sent" });
@@ -274,38 +275,63 @@ setDownloadInitiated(true);
     navigate(`/access?device=${deviceId}`);
   };
 
-  const handleAcceptRequest = (requestId: string) => {
-    const request = requests.find((r) => r.id === requestId);
-    if (request) {
-      const device = devices.find((d) => d.id === request.deviceId);
-      if (device) {
-        setActiveConnections((prev) => [
-          ...prev,
-          { ...device, status: "online" },
-        ]);
-      }
+const handleAcceptRequest = async (requesterId: string) => {
+  console.log(requesterId,userid)
+  await axios.post(`${Apiurl}/api/device/accept-request`, {
+    userId: userid,
+    requesterId,
+  });
 
-      setRequests((prev) => prev.filter((r) => r.id !== requestId));
+  setRequests((prev) => prev.filter((r) => r.fromUserId !== requesterId));
+  
+  toast({
+    title: "Request Accepted",
+    description: `Access granted to user.`,
+  });
+};
 
-      toast({
-        title: "Request Accepted",
-        description: `Access granted to ${request.fromUserEmail}`,
-      });
-    }
-  };
+//   const request = requests.find((r) => r.id === requestId);
+//   console.log(request)
+//   if (request) {
+//     await axios.post(`${Apiurl}/api/device/accept-request`, {
+//       userId: userid,
+//       deviceId: request.deviceId,
+//       requesterId: request.fromUserId,
+//     });
 
-  const handleRejectRequest = (requestId: string) => {
-    const request = requests.find((r) => r.id === requestId);
-    if (request) {
-      setRequests((prev) => prev.filter((r) => r.id !== requestId));
+//     setRequests((prev) => prev.filter((r) => r.id !== requestId));
+//     toast({
+//       title: "Request Accepted",
+//       description: `Access granted to ${request.fromUserEmail}`,
+//     });
+//   }
+// };
 
-      toast({
-        title: "Request Rejected",
-        description: `Access denied to ${request.fromUserEmail}`,
-        variant: "destructive",
-      });
-    }
-  };
+const handleRejectRequest = async (requestId: string, requesterEmail: string) => {
+  console.log("🤣🤣🤣",requestId,requesterEmail)
+  try {
+    await axios.post(`${Apiurl}/api/device/reject-request`, {
+      userId: userid,
+      requesterId: requestId,
+    });
+
+    setRequests((prev) => prev.filter((r) => r.id !== requestId));
+    toast({
+      title: "Request Rejected",
+      description: `Access denied to ${requesterEmail}`,
+      variant: "destructive",
+    });
+  } catch (error) {
+    toast({
+      title: "Error",
+      description: "Failed to reject request. Please try again.",
+      variant: "destructive",
+    });
+    console.error("Error rejecting request:", error);
+  }
+};
+
+
 const skipped = () => {
   localStorage.setItem("skip", "true"); 
   setAgentDownloadState(true);
@@ -527,7 +553,7 @@ const renderActionButton = (device) => {
 
   return (
     <Button
-      onClick={() => handleSendRequest(device.id, device.userId,device.name)}
+      onClick={() => handleSendRequest(device.userId)}
       variant="outline"
       className="w-full sm:w-36 h-8 sm:h-9 text-xs sm:text-sm"
     >
@@ -539,9 +565,9 @@ const renderActionButton = (device) => {
   const displayDevices = showAllDevices ? devices : devices;
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-full sm:max-w-7xl">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 space-y-4 sm:space-y-0">
+    <div className="min-h-screen bg-background overflow-auto">
+      <div className="container mx-auto px-4 py-4 sm:py-8 max-w-full sm:max-w-7xl">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
           <div>
             <h1 className="text-3xl font-bold text-foreground truncate">
               Device Manager
@@ -572,7 +598,7 @@ const renderActionButton = (device) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {/* Cards */}
           {[
             {
@@ -620,7 +646,7 @@ const renderActionButton = (device) => {
             </Card>
           ))}
         </div>
-        <Card className="bg-card border-border shadow-xl w-full overflow-hidden rounded-lg">
+        <Card className="bg-card border-border shadow-xl w-full overflow-hidden rounded-lg mb-4 sm:mb-6">
           <CardContent className="px-2 py-3 sm:px-4 sm:py-6">
             <Tabs defaultValue="devices" className="space-y-3 sm:space-y-5">
               {/* Tabs Header */}
@@ -661,7 +687,7 @@ const renderActionButton = (device) => {
                       variant="secondary"
                       className="ml-1 bg-orange-100 text-orange-800 text-xs h-4 min-w-4 px-1"
                     >
-                      {incomingrequest?.length}
+                      {incomingrequest.length}
                     </Badge>
                   )}
                 </TabsTrigger>
@@ -693,7 +719,7 @@ const renderActionButton = (device) => {
                   </div>
                 </div>
 
-                <ScrollArea className="max-h-[350px] sm:max-h-[400px] lg:max-h-[500px] pr-1">
+                <ScrollArea className="max-h-[280px] sm:max-h-[350px] lg:max-h-[450px] pr-1 overflow-y-auto scrollbar-none">
                   <div className="space-y-2 sm:space-y-3">
                     {displayDevices?.map((device) => (
                  <div
@@ -753,7 +779,7 @@ const renderActionButton = (device) => {
                 </div>
 
                 {connecteddevices?.length > 0 ? (
-                  <ScrollArea className="max-h-[350px] sm:max-h-[400px] lg:max-h-[500px] pr-1">
+                  <ScrollArea className="max-h-[280px] sm:max-h-[350px] lg:max-h-[450px] pr-1 overflow-y-auto scrollbar-none">
                     <div className="space-y-2 sm:space-y-3">
                       {connecteddevices?.map((device) => (
                         <div
@@ -819,59 +845,66 @@ const renderActionButton = (device) => {
                 </div>
 
              {incomingrequest?.length > 0 ? (
-  <ScrollArea className="max-h-[350px] sm:max-h-[400px] lg:max-h-[500px] pr-1">
+  <ScrollArea className="max-h-[280px] sm:max-h-[350px] lg:max-h-[450px] pr-1 overflow-y-auto scrollbar-none">
     <div className="grid grid-cols-1 gap-3 sm:gap-4">
-      {incomingrequest?.map((device) => (
+      {incomingrequest.map((device) => (
         <div
           key={device.id}
           className="flex flex-col sm:flex-row gap-3 p-3 sm:p-4 bg-muted/50 rounded-lg sm:rounded-xl border border-emerald-200 hover:bg-muted/80 w-full justify-between items-center"
         >
-          {/* Device Info + Sender Info */}
           <div className="flex items-start gap-3 w-full flex-1">
             <div className="p-1.5 sm:p-2 bg-emerald-50 dark:bg-emerald-950 rounded-lg flex-shrink-0">
               <Monitor className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 dark:text-emerald-400" />
             </div>
 
-            <div className="flex-1 overflow-hidden min-w-0">
-              <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-1">
-                <h4 className="font-semibold text-sm sm:text-lg truncate">
-                  {device.name}
-                </h4>
-                <Wifi className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-600" />
-                <Badge className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs">
-                  Incoming Request
-                </Badge>
-              </div>
+     <div className="flex-1 overflow-hidden min-w-0">
+  <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-1">
+    <h4 className="font-semibold text-sm sm:text-lg truncate">
+      {device.name || device.senderInfo?.name || "Unknown Requester"}
+    </h4>
 
-              <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
-                <span>{device.os}</span>
-                {device.hostname && (
-                  <span className="hidden sm:inline">• {device.hostname}</span>
-                )}
-              </div>
+    {device.status === "online" && (
+      <Wifi className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-600" />
+    )}
 
-              {/* 👤 Sender Info */}
-              {device.senderInfo && (
-                <div className="mt-2 text-xs sm:text-sm text-foreground">
-                  <p className="font-medium">
-                    Request from: {device.senderInfo.name || "Unknown User"}
-                  </p>
-                  <p className="text-muted-foreground">{device.senderInfo.email}</p>
-                </div>
-              )}
-            </div>
+    <Badge className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs">
+      Incoming Request
+    </Badge>
+  </div>
+
+  <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
+    {device.os && <span>{device.os}</span>}
+    {device.hostname && (
+      <span className="hidden sm:inline">• {device.hostname}</span>
+    )}
+    {/* {!device.os && !device.hostname && (
+      <span>Offline Device</span>
+    )} */}
+  </div>
+
+  {(device.senderInfo || device.email) && (
+    <div className="mt-2 text-xs sm:text-sm text-foreground">
+      <p className="font-medium">
+        Request from: {device.senderInfo?.name || device.name || "Unknown"}
+      </p>
+      <p className="text-muted-foreground">
+        {device.senderInfo?.email || device.email || "No email"}
+      </p>
+    </div>
+  )}
+</div>
+
           </div>
 
-          {/* Buttons */}
           <div className="flex flex-col gap-2 sm:gap-2 sm:items-end w-full sm:w-auto sm:ml-4">
             <Button
-              onClick={() => handleAcceptRequest(device.id, device.senderInfo?.id)}
+              onClick={() => handleAcceptRequest(device.id)}
               className="w-full sm:w-32 bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm h-8"
             >
               Accept
             </Button>
             <Button
-              onClick={() => handleRejectRequest(device.id, device.senderInfo?.id)}
+              onClick={() => handleRejectRequest(device.id,device.email)}
               className="w-full sm:w-32 bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm h-8"
             >
               Reject
@@ -896,6 +929,9 @@ const renderActionButton = (device) => {
             </Tabs>
           </CardContent>
         </Card>
+        
+        {/* Bottom spacing for mobile scroll */}
+        <div className="h-16 sm:h-8"></div>
       </div>
     </div>
   );

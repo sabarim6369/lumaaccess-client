@@ -114,3 +114,6 @@ All colors MUST be HSL.
     letter-spacing: -0.05em;
   }
 }
+.scrollbar-none::-webkit-scrollbar{
+display: none;
+}

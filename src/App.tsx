@@ -37,9 +37,9 @@ function App() {
               </ProtectedRoute>
             } />
             <Route path="/settings" element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <Settings />
-              </ProtectedRoute>
+              // </ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />
           </Routes>
