@@ -94,7 +94,7 @@ const [incomingrequest,setincomingrequest]=useState<AccessRequest[]>([])
       const user = JSON.parse(localStorage.getItem("user") || "{}");
   const userId = user.userId;
       const res = await axios.get( `${Apiurl}/api/device/devices`,{params:{userid:userId}});
-      setDevices(res.data.allDevices);
+      setDevices(res.data);
       setconnecteddevices(res.data.connected);
       setrequesteddevice(res.data.requested_by_me);
       setincomingrequest(res.data.incomingrequest);
@@ -501,7 +501,7 @@ const renderActionButton = (device) => {
     );
   }
 
-  if (device.statusType === "requested_by_me") {
+  if (device.statusType === "requested") {
     return (
       <Button
         variant="outline"
@@ -667,7 +667,6 @@ const renderActionButton = (device) => {
                 </TabsTrigger>
               </TabsList>
 
-              {/* Devices Tab */}
               <TabsContent value="devices" className="space-y-3 sm:space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 flex-wrap">
                   <h3 className="text-base sm:text-lg font-semibold text-foreground">
