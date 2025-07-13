@@ -22,6 +22,7 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { setUser } = useAuth();
+const [rememberMe, setRememberMe] = useState(false);
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string } = {};
@@ -53,6 +54,7 @@ const Login = () => {
     const res = await axios.post(`${Apiurl}/api/auth/login`, {
       email,
       password,
+      rememberMe
     },{withCredentials:true});
     const user = res.data;
 
@@ -150,7 +152,10 @@ setIsAuthenticated(true)
 
               <div className="flex items-center justify-between">
                 <label className="flex items-center">
-                  <input type="checkbox" className="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500" />
+                  <input type="checkbox" 
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}                  
+                  className="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500" />
                   <span className="ml-2 text-sm text-slate-600">Remember me</span>
                 </label>
                 <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-800 font-medium">

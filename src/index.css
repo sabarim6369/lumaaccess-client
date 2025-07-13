@@ -113,12 +113,3 @@
 .scrollbar-none::-webkit-scrollbar{
 display: none;
 }
-.app {
-  min-height: 100vh;
-  background: linear-gradient(
-    to bottom,
-    hsl(217, 91%, 60%) 0%,      /* Top: Blue */
-    hsl(240, 6%, 20%) 50%,      /* Middle: Dark Grayish */
-    hsl(222, 84%, 5%) 100%      /* Bottom: Near Black */
-  );
-}

@@ -11,6 +11,7 @@ import { signup } from '@/lib/auth';
 import { useAuth } from '@/contexts/AuthContext';
 import axios from 'axios'
 import Apiurl from './../api';
+import useAuthStore from '@/Zustandstore/useAuthstore';
 const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,6 +28,8 @@ const Signup = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { setUser } = useAuth();
+    const {setIsAuthenticated}=useAuthStore()
+  
 
   const validateForm = () => {
     const newErrors: { 
@@ -75,7 +78,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     localStorage.setItem("user", JSON.stringify(user));
     setUser(user);
-
+setIsAuthenticated(true)
     toast({
       title: "Account created successfully!",
       description: "Welcome to Remote Access Manager. You can now access your dashboard.",
@@ -192,7 +195,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 <input 
                   type="checkbox" 
                   id="terms"
-                  className="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 mt-1" 
+                  className="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 mt-1 cursor-pointer" 
                   required
                 />
                 <label htmlFor="terms" className="ml-2 text-sm text-slate-600">
