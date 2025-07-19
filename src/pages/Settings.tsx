@@ -11,6 +11,15 @@ import {
   Power, Moon, RotateCcw, Lock, Unlock, Image, Folder, Camera,
   Volume2, VolumeX, Terminal, FileText, Eye, Download, Upload, Settings
 } from "lucide-react";
+import {
+  hasDownloadedAgent,
+  setAgentDownloaded,
+  mockDevices,
+  mockRequests,
+  logout,
+  Device,
+  AccessRequest,
+} from "@/lib/auth"
 interface AllowedUser {
   id: string;
   name: string;
@@ -151,6 +160,117 @@ const handlemanageaccess=async(userid)=>{
   setopenpup(true);
 
 }
+  const getPlatformDownloadURL = () => {
+    const platform = window.navigator.platform.toLowerCase();
+    const userAgent = window.navigator.userAgent.toLowerCase();
+
+    if (platform.includes("win")) {
+return "/electron-agent.exe";
+    } else if (platform.includes("mac") || userAgent.includes("mac")) {
+      return "/downloads/luma-agent-mac.dmg";
+    } else if (userAgent.includes("linux")) {
+      return "/downloads/luma-agent-linux.AppImage";
+    } else {
+      return null; // Unsupported
+    }
+  };
+
+  const handleDownloadAgent = () => {
+  const platform = window.navigator.platform.toLowerCase();
+  const userAgent = window.navigator.userAgent.toLowerCase();
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const userId = user.userId;
+console.log(userId)
+  if (!userId) {
+    toast({
+      title: "Login Required",
+      description: "Please log in before downloading the agent.",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  if (platform.includes("win")) {
+    const exeUrl = "/electron-agent.exe";
+    const exeLink = document.createElement("a");
+    exeLink.href = exeUrl;
+    exeLink.download = "electron-agent.exe";
+    document.body.appendChild(exeLink);
+    exeLink.click();
+    document.body.removeChild(exeLink);
+
+    // Step 2: Generate .bat content dynamically
+    const batContent = `
+@echo off
+:: Create config folder and write userId
+mkdir %USERPROFILE%\\.lumaagent 2>nul
+echo { "userId": "${userId}" } > %USERPROFILE%\\.lumaagent\\config.json
+
+:: Find the actual filename (first match)
+for %%f in ("%USERPROFILE%\\Downloads\\electron-agent*.exe") do (
+  set "agent=%%~f"
+  goto :found
+)
+
+echo Agent not found in Downloads folder.
+pause
+exit /b
+
+:found
+echo Launching agent at %agent%
+start "" "%agent%"
+
+`;
+
+    const blob = new Blob([batContent], { type: "application/octet-stream" });
+    const batLink = document.createElement("a");
+    batLink.href = URL.createObjectURL(blob);
+    batLink.download = "launch-luma-agent.bat";
+    document.body.appendChild(batLink);
+    batLink.click();
+    document.body.removeChild(batLink);
+
+    toast({
+      title: "Launcher Downloaded",
+      description:
+        "Please run the 'launch-luma-agent.bat' file to complete the setup.",
+    });
+
+    setAgentDownloaded();
+    setTimeout(()=>{
+    // setAgentDownloadState(true);
+
+    },4000)
+    return;
+  }
+
+  // macOS / Linux fallback
+  const fallbackUrl = getPlatformDownloadURL();
+  if (!fallbackUrl) {
+    toast({
+      title: "Unsupported Platform",
+      description:
+        "We couldn't detect a supported OS. Please download manually.",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  const link = document.createElement("a");
+  link.href = fallbackUrl;
+  link.download = fallbackUrl.split("/").pop();
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  setAgentDownloaded();
+  // setAgentDownloadState(true);
+  toast({
+    title: "Agent Downloaded",
+    description:
+      "Remote access agent has been downloaded. Please install it on your device.",
+  });
+};
 
   return (
     <div className="min-h-screen bg-background text-foreground bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
@@ -161,6 +281,15 @@ const handlemanageaccess=async(userid)=>{
             <h1 className="text-3xl font-bold">Device Access Settings</h1>
             <p className="text-muted-foreground text-sm">Manage who currently has access to your devices</p>
           </div>
+          <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={() => handleDownloadAgent()}
+            className="flex items-center gap-2"
+          >
+            <Download className="h-4 w-4" />
+            Download Agent
+          </Button>
           <Button
             variant="outline"
             onClick={() => navigate('/dashboard')}
@@ -169,6 +298,7 @@ const handlemanageaccess=async(userid)=>{
             <ArrowLeft className="h-4 w-4" />
             Back to Dashboard
           </Button>
+          </div>
         </div>
 
         {/* Stats */}

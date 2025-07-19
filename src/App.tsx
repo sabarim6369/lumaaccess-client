@@ -92,7 +92,7 @@ import Apiurl from './api';
 import useAuthStore from "./Zustandstore/useAuthstore";
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
-
+import ScreenShareViewer from "./pages/ScreenShareViewer";
 interface JWTPayload {
   exp: number;
   userId: string;
@@ -143,6 +143,7 @@ function App() {
             <Route path="/detail" element={isAuthenticated ? <DeviceDetail /> : <Navigate to="/login" />} />
             <Route path="/access" element={isAuthenticated ? <DeviceAccess /> : <Navigate to="/login" />} />
             <Route path="/settings" element={isAuthenticated ? <Settingss /> : <Navigate to="/login" />} />
+            <Route path="/ScreenShareViewer" element={isAuthenticated ? <ScreenShareViewer /> : <Navigate to="/login" />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="*" element={<NotFound />} />

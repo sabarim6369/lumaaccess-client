@@ -59,6 +59,7 @@ const [incomingrequest,setincomingrequest]=useState<AccessRequest[]>([])
   const [activeConnections, setActiveConnections] = useState<Device[]>([]);
   const [showAllDevices, setShowAllDevices] = useState(false);
   const { user, setUser } = useAuth();
+  console.log(user)
   const { toast } = useToast();
   const navigate = useNavigate();
   const [userid,setuserid]=useState();
@@ -136,7 +137,7 @@ useEffect(() => {
       // Optionally notify backend via WebSocket here
       // socket?.emit("agent-online", { userId: user.id });
     }
-  }, 2000); // check every 2s
+  }, 2000); 
 
   return () => clearInterval(interval);
 }, [downloadInitiated]);
@@ -152,7 +153,7 @@ return "/electron-agent.exe";
     } else if (userAgent.includes("linux")) {
       return "/downloads/luma-agent-linux.AppImage";
     } else {
-      return null; // Unsupported
+      return null; 
     }
   };
 
@@ -632,7 +633,7 @@ const renderActionButton = (device) => {
                 <Users className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
               ),
               label: "Active Connections",
-              value: activeConnections?.length,
+              value: devices?.length,
               bg: "bg-emerald-50 dark:bg-emerald-950",
               iconWrapper: "p-3 rounded-xl",
             },
@@ -737,50 +738,59 @@ const renderActionButton = (device) => {
 
                 <ScrollArea className="max-h-[280px] sm:max-h-[350px] lg:max-h-[450px] pr-1 overflow-y-auto scrollbar-none">
                   <div className="space-y-2 sm:space-y-3">
-                    {loading ? (
+                  {loading ? (
   <div className="flex justify-center items-center w-full p-4">
     <span className="text-white font-bold text-lg">Loading devices...</span>
   </div>
-) : (displayDevices?.map((device) => (
-                 <div
-  key={device.id}
-  className="flex flex-col sm:flex-row  gap-3 p-3 sm:p-4 bg-muted/50 rounded-lg sm:rounded-xl border border-border hover:bg-muted/80 transition-all w-full"
->
-  <div className="flex items-start gap-3 w-full flex-1">
-    <div className="p-1.5 sm:p-2 bg-background rounded-lg flex-shrink-0">
-      <Monitor className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
-    </div>
-    <div className="flex-1 overflow-hidden min-w-0">
-      <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-1">
-        <h4 className="font-semibold text-sm sm:text-lg truncate">
-          {device.name}
-        </h4>
-        {getStatusIcon(device.status)}
-        {getStatusBadge(device.status)}
-      </div>
-      <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
-        <span>{device.os}</span>
-        {device.hostname && (
-          <span className="hidden sm:inline">• {device.hostname}</span>
-        )}
-        {device.lastSeen && (
-          <span className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            <span className="truncate">{device.lastSeen}</span>
-          </span>
-        )}
-      </div>
-    </div>
+) : displayDevices?.length === 0 ? (
+  <div className="text-center py-8 sm:py-12">
+    <Bell className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />
+    <h4 className="text-base sm:text-lg font-medium text-foreground mb-2">
+      No live connections
+    </h4>
+    <p className="text-sm sm:text-base text-muted-foreground">
+      Live connections will appear here
+    </p>
   </div>
+) : (
+  displayDevices.map((device) => (
+    <div
+      key={device.id}
+      className="flex flex-col sm:flex-row gap-3 p-3 sm:p-4 bg-muted/50 rounded-lg sm:rounded-xl border border-border hover:bg-muted/80 transition-all w-full"
+    >
+      <div className="flex items-start gap-3 w-full flex-1">
+        <div className="p-1.5 sm:p-2 bg-background rounded-lg flex-shrink-0">
+          <Monitor className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+        </div>
+        <div className="flex-1 overflow-hidden min-w-0">
+          <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-1">
+            <h4 className="font-semibold text-sm sm:text-lg truncate">
+              {device.name}
+            </h4>
+            {getStatusIcon(device.status)}
+            {getStatusBadge(device.status)}
+          </div>
+          <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
+            <span>{device.os}</span>
+            {device.hostname && (
+              <span className="hidden sm:inline">• {device.hostname}</span>
+            )}
+            {device.lastSeen && (
+              <span className="flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                <span className="truncate">{device.lastSeen}</span>
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="w-full sm:w-auto sm:flex sm:items-center">
+        {renderActionButton(device)}
+      </div>
+    </div>
+  ))
+)}
 
-  <div className="w-full sm:w-auto sm:flex sm:items-center">
-    {renderActionButton(device)}
-
-
-  </div>
-</div>
-
-                    )))}
                   </div>
                 </ScrollArea>
               </TabsContent>
@@ -950,7 +960,6 @@ const renderActionButton = (device) => {
           </CardContent>
         </Card>
         
-        {/* Bottom spacing for mobile scroll */}
         <div className="h-16 sm:h-8"></div>
       </div>
     </div>

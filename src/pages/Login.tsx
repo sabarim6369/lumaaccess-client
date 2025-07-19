@@ -57,7 +57,8 @@ const [rememberMe, setRememberMe] = useState(false);
       rememberMe
     },{withCredentials:true});
     const user = res.data;
-
+console.log("😃😃😃",user)
+localStorage.removeItem("skip")
     localStorage.setItem("user", JSON.stringify(user));
     setUser(user);
 setIsAuthenticated(true)
