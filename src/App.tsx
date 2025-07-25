@@ -93,6 +93,7 @@ import useAuthStore from "./Zustandstore/useAuthstore";
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import ScreenShareViewer from "./pages/ScreenShareViewer";
+import Chatbot from "./pages/Chatbot";
 interface JWTPayload {
   exp: number;
   userId: string;
@@ -151,6 +152,7 @@ function App() {
           <Toaster />
         </div>
       </Router>
+      <Chatbot/>
     </AuthProvider>
   );
 }
