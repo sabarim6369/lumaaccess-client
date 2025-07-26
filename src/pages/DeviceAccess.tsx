@@ -46,7 +46,9 @@ const DeviceAccess = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 const [permissionData, setPermissionData] = useState(null);
-
+ const [firstimage, setfirstimage] = useState<string>("");
+const [showScreenPopup, setShowScreenPopup] = useState(false);
+const [isScreenSharing, setIsScreenSharing] = useState(false);
 
 useEffect(() => {
   const getdata = async () => {
@@ -82,28 +84,68 @@ useEffect(() => {
 
   getdata();
 }, [deviceId]);
+useEffect(() => {
+  let interval: NodeJS.Timeout;
 
-  const handleCommand = async (command: string) => {
+  if (isScreenSharing) {
+    interval = setInterval(async () => {
+      try {
+        const res = await axios.post(`${Apiurl}/api/device/getscreenshare`, {
+          deviceId: device.id,
+        }, {
+          withCredentials: true,
+        });
+
+        const imagesObj = res.data.images;
+        const firstKey = Object.keys(imagesObj)[0];
+        const firstImage = imagesObj[firstKey];
+        setfirstimage(firstImage);
+      } catch (error) {
+        console.error("Error fetching screen share:", error);
+      }
+    }, 2000);
+  }
+
+  return () => {
+    clearInterval(interval);
+  };
+}, [isScreenSharing]);
+
+const handleCommand = async (command: string) => {
   try {
     if (!device?.id) {
       throw new Error("No device selected");
     }
 
+  
+
+
     const res = await axios.post(`${Apiurl}/api/device/send-command`, {
       deviceId: device.id,
       commandType: command,
-    },{  withCredentials: true,
-});
+    }, {
+      withCredentials: true,
+    });
 
     toast({
       title: "Command Executed",
-      description: `${command} command sent to ${device?.name}`,
+      description: `${command} command sent to ${device.name}`,
     });
+  if (command === "Screen Share") {
+  setShowScreenPopup(true);
+  setIsScreenSharing(true); 
+  toast({
+    title: "Screen Share Opened",
+    description: `Showing screen from ${device.name}`,
+  });
+
+  return;
+}
   } catch (error) {
     toast({
       title: "Command Failed",
       description: error instanceof Error ? error.message : 'Unknown error',
-      variant: 'destructive', // assuming your toast supports variants
+      variant: 'destructive',
     });
   }
 };
@@ -130,10 +172,10 @@ const filteredActions = controlActions.filter((action) => {
   if (!permissionData) return false;
 
   const key = action.name
-    .replace(/\s+/g, '')              // remove spaces
-    .replace(/^[A-Z]/, (c) => c.toLowerCase()); // lowercase first char
+    .replace(/\s+/g, '')             
+    .replace(/^[A-Z]/, (c) => c.toLowerCase()); 
 
-  return permissionData[key]; // true only if allowed
+  return permissionData[key]; 
 });
 
   const handleDisconnect = () => {
@@ -160,6 +202,7 @@ const filteredActions = controlActions.filter((action) => {
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
@@ -307,6 +350,31 @@ const filteredActions = controlActions.filter((action) => {
           </CardContent>
         </Card>
       </div>
+      {showScreenPopup && (
+  <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex justify-center items-center">
+    <div className="bg-white p-6 rounded-lg max-w-4xl w-full shadow-xl relative">
+      <button
+        className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
+        onClick={() => {
+    setShowScreenPopup(false);
+    setIsScreenSharing(false); // stop the interval
+  }}
+      >
+        ✕
+      </button>
+      <h2 className="text-2xl font-semibold mb-4">Live Screen</h2>
+      {firstimage ? (
+        <img
+          src={`data:image/png;base64,${firstimage}`}
+          alt="Screen Share"
+          className="w-full h-auto rounded border"
+        />
+      ) : (
+        <p className="text-gray-600">Loading screen...</p>
+      )}
+    </div>
+  </div>
+)}
     </div>
   );
 };

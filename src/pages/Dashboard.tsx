@@ -162,7 +162,7 @@ return "/electron-agent.exe";
   const userAgent = window.navigator.userAgent.toLowerCase();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const userId = user.userId;
-console.log(userId)
+console.log("userid consoled",userId)
   if (!userId) {
     toast({
       title: "Login Required",
@@ -257,6 +257,7 @@ setDownloadInitiated(true);
 
 
  const handleSendRequest = async (targetUserId) => {
+  console.log("consoleing target user id", targetUserId);
   try {
     const user = JSON.parse(localStorage.getItem("user")); // assuming you store current user
     const currentUserId = user?.userId;

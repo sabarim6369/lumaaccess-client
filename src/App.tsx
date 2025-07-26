@@ -94,6 +94,7 @@ import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import ScreenShareViewer from "./pages/ScreenShareViewer";
 import Chatbot from "./pages/Chatbot";
+import Dummy from './pages/Dummy/Dummy';
 interface JWTPayload {
   exp: number;
   userId: string;
@@ -147,6 +148,7 @@ function App() {
             <Route path="/ScreenShareViewer" element={isAuthenticated ? <ScreenShareViewer /> : <Navigate to="/login" />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/Dummy" element={<Dummy />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Toaster />
