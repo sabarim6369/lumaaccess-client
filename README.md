@@ -5,6 +5,7 @@ A centralized web dashboard for monitoring and controlling remote devices in rea
 ## 🎯 Overview
 
 The Connected Device Hub is the frontend web application that provides a user-friendly interface for managing multiple remote devices. It displays real-time screen and camera streams, executes remote commands, and monitors device status — all through an intuitive dashboard.
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/1e84f9ed-e89e-46c7-b0cd-bd6d77df5f36" />
 
 ## ✨ Features
 
