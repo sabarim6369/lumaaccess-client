@@ -97,17 +97,30 @@ const[loading,setloading]=useState(false);
       setloading(true);
       const user = JSON.parse(localStorage.getItem("user") || "{}");
   const userId = user.userId;
+  console.log("📱 Fetching devices for userId:", userId);
   setuserid(userId)
-      const res = await axios.get( `${Apiurl}/api/device/devices`,{params:{userid:userId},  withCredentials: true
+      try {
+        const res = await axios.get( `${Apiurl}/api/device/devices`,{params:{userid:userId},  withCredentials: true
 });
-      setDevices(res.data.list);
-      setconnecteddevices(res.data.connectedevice);
-      setrequesteddevice(res.data.requesteddevice);
-      setincomingrequest(res.data.incomingrequest);
+      console.log("✅ Device fetch response:", res.data);
+      console.log("📊 Total devices:", res.data.list?.length);
+      console.log("🟢 Connected devices:", res.data.connectedevice?.length);
+      console.log("🔵 Requested devices:", res.data.requesteddevice?.length);
+      console.log("🟠 Incoming requests:", res.data.incomingrequest?.length);
+      
+      setDevices(res.data.list || []);
+      setconnecteddevices(res.data.connectedevice || []);
+      setrequesteddevice(res.data.requesteddevice || []);
+      setincomingrequest(res.data.incomingrequest || []);
 
       console.log(res.data,"🤣🤣🤣🤣")
       localStorage.setItem("devices", JSON.stringify(res.data.list));
-      setloading(false);
+      } catch (error) {
+        console.error("❌ Error fetching devices:", error);
+        console.error("Error details:", error.response?.data);
+      } finally {
+        setloading(false);
+      }
     };
     fetchdata();
   }, []);
