@@ -102,7 +102,7 @@ const[loading,setloading]=useState(false);
 });
       setDevices(res.data.list);
       setconnecteddevices(res.data.connectedevice);
-      setrequesteddevice(res.data.requested_by_me);
+      setrequesteddevice(res.data.requesteddevice);
       setincomingrequest(res.data.incomingrequest);
 
       console.log(res.data,"🤣🤣🤣🤣")
