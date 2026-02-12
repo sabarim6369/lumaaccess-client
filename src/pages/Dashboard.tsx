@@ -409,14 +409,18 @@ setIsAuthenticated(false)
 
   if (!agentDownloaded) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8 max-w-full sm:max-w-3xl">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+        {/* Animated background */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(96,165,250,0.2),rgba(255,255,255,0))]" />
+        
+        <div className="relative container mx-auto px-4 py-8 max-w-full sm:max-w-3xl">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 space-y-4 sm:space-y-0">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground truncate">
+            <div className="space-y-2">
+              <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-400 via-purple-300 to-pink-400 bg-clip-text text-transparent drop-shadow-2xl">
                 Welcome, {user?.name || user?.email}
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-slate-300 text-lg font-medium">
                 Remote Access Manager Dashboard
               </p>
             </div>
@@ -425,16 +429,16 @@ setIsAuthenticated(false)
                 onClick={() => navigate("/settings")}
                 variant="outline"
                 size="sm"
-                className="flex items-center justify-center space-x-2 w-full sm:w-auto"
+                className="bg-white/10 backdrop-blur-xl border-white/20 hover:bg-white/20 text-white shadow-xl transition-all duration-300 hover:scale-105 flex items-center justify-center space-x-2 w-full sm:w-auto"
               >
                 <Settings className="h-4 w-4" />
-                <span>Handle My Device Connections</span>
+                <span>My Connections</span>
               </Button>
               <Button
                 onClick={handleLogout}
                 variant="outline"
                 size="sm"
-                className="flex items-center justify-center space-x-2 w-full sm:w-auto"
+                className="bg-white/10 backdrop-blur-xl border-white/20 hover:bg-red-500/30 text-white shadow-xl transition-all duration-300 hover:scale-105 flex items-center justify-center space-x-2 w-full sm:w-auto"
               >
                 <LogOut className="h-4 w-4" />
                 <span>Logout</span>
@@ -443,15 +447,15 @@ setIsAuthenticated(false)
           </div>
 
           <div className="max-w-full mx-auto">
-            <Card className="shadow-xl border-border bg-card w-full">
+            <Card className="shadow-2xl border-white/20 bg-white/10 backdrop-blur-2xl w-full overflow-hidden">
               <CardHeader className="text-center pb-6 px-4 sm:px-6">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-primary rounded-3xl mb-4 mx-auto">
-                  <Download className="h-10 w-10 text-primary-foreground" />
+                <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-500 rounded-3xl mb-4 mx-auto shadow-2xl shadow-blue-500/50 animate-pulse">
+                  <Download className="h-12 w-12 text-white" />
                 </div>
-                <CardTitle className="text-2xl font-bold text-card-foreground">
+                <CardTitle className="text-3xl font-bold text-white drop-shadow-lg">
                   Download Remote Agent
                 </CardTitle>
-                <CardDescription className="text-lg text-muted-foreground px-2 sm:px-0">
+                <CardDescription className="text-lg text-slate-300 px-2 sm:px-0 mt-2">
                   Install our secure agent to start managing your devices
                   remotely
                 </CardDescription>
@@ -539,9 +543,9 @@ const renderActionButton = (device) => {
     return (
       <Button
         onClick={() => handleAccessDevice(device.id)}
-        className="w-full sm:w-32 bg-primary hover:bg-primary/90 text-primary-foreground h-8 sm:h-9 text-xs sm:text-sm"
+        className="w-full sm:w-36 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white h-10 sm:h-11 text-sm sm:text-base font-bold shadow-xl shadow-emerald-500/50 hover:shadow-2xl hover:scale-105 transition-all duration-300"
       >
-        Access <ChevronRight className="ml-1 h-3 w-3 sm:h-4 sm:w-4" />
+        Access <ChevronRight className="ml-1 h-4 w-4 sm:h-5 sm:w-5" />
       </Button>
     );
   }
@@ -550,7 +554,7 @@ const renderActionButton = (device) => {
     return (
       <Button
         variant="outline"
-        className="w-full sm:w-36 h-8 sm:h-9 text-xs sm:text-sm"
+        className="w-full sm:w-36 h-10 sm:h-11 text-sm sm:text-base font-semibold bg-yellow-500/20 border-yellow-500/50 text-yellow-300 cursor-not-allowed"
         disabled
       >
         Request Pending
@@ -562,7 +566,7 @@ const renderActionButton = (device) => {
     return (
       <Button
         variant="secondary"
-        className="w-full sm:w-36 h-8 sm:h-9 text-xs sm:text-sm"
+        className="w-full sm:w-36 h-10 sm:h-11 text-sm sm:text-base font-semibold bg-slate-700/50 text-slate-300 cursor-not-allowed"
         disabled
       >
         Your Device
@@ -574,7 +578,7 @@ const renderActionButton = (device) => {
     <Button
       onClick={() => handleSendRequest(device.userId)}
       variant="outline"
-      className="w-full sm:w-36 h-8 sm:h-9 text-xs sm:text-sm"
+      className="w-full sm:w-36 h-10 sm:h-11 text-sm sm:text-base font-bold bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white border-0 shadow-xl shadow-blue-500/50 hover:shadow-2xl hover:scale-105 transition-all duration-300"
     >
       Send Request
     </Button>
@@ -584,15 +588,19 @@ const renderActionButton = (device) => {
   const displayDevices = showAllDevices ? devices : devices;
 
   return (
-    <div className="min-h-screen bg-background overflow-auto bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-4 sm:py-8 max-w-full sm:max-w-7xl">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground truncate">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-auto relative">
+      {/* Animated background effect */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(96,165,250,0.2),rgba(255,255,255,0))]" />
+      
+      <div className="relative container mx-auto px-4 py-6 sm:py-10 max-w-full sm:max-w-7xl">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 sm:mb-12 space-y-4 sm:space-y-0">
+          <div className="space-y-2">
+            <h1 className="text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-blue-400 via-purple-300 to-pink-400 bg-clip-text text-transparent drop-shadow-2xl">
               Device Manager
             </h1>
-            <p className="text-muted-foreground mt-1">
-              Manage and access your connected devices
+            <p className="text-slate-300 text-lg font-medium">
+              Manage and access your connected devices with ease
             </p>
           </div>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
@@ -600,16 +608,16 @@ const renderActionButton = (device) => {
               onClick={() => navigate("/settings")}
               variant="outline"
               size="sm"
-              className="shadow-sm flex items-center justify-center space-x-2 w-full sm:w-auto"
+              className="bg-white/10 backdrop-blur-xl border-white/20 hover:bg-white/20 text-white shadow-2xl transition-all duration-300 hover:scale-105 flex items-center justify-center space-x-2 w-full sm:w-auto"
             >
               <Settings className="h-4 w-4" />
-              <span>Handle My Device Connections</span>
+              <span>My Connections</span>
             </Button>
             <Button
               onClick={handleLogout}
               variant="outline"
               size="sm"
-              className="flex items-center justify-center space-x-2 shadow-sm w-full sm:w-auto"
+              className="bg-white/10 backdrop-blur-xl border-white/20 hover:bg-red-500/30 text-white shadow-2xl transition-all duration-300 hover:scale-105 flex items-center justify-center space-x-2 w-full sm:w-auto"
             >
               <LogOut className="h-4 w-4" />
               <span>Logout</span>
@@ -617,46 +625,52 @@ const renderActionButton = (device) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          {/* Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
+          {/* Glassmorphism Stats Cards */}
           {[
             {
               icon: (
-                <Monitor className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                <Monitor className="h-7 w-7 text-blue-400" />
               ),
               label: "Total Devices",
               value: devices?.length,
-              bg: "bg-blue-50 dark:bg-blue-950",
-              iconWrapper: "p-3 rounded-xl",
+              gradient: "from-blue-500/20 to-cyan-500/20",
+              iconBg: "bg-gradient-to-br from-blue-500 to-cyan-500",
+              glowColor: "shadow-blue-500/50",
             },
             {
               icon: (
-                <Users className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                <Users className="h-7 w-7 text-emerald-400" />
               ),
               label: "Active Connections",
-              value: devices?.length,
-              bg: "bg-emerald-50 dark:bg-emerald-950",
-              iconWrapper: "p-3 rounded-xl",
+              value: connecteddevices?.length,
+              gradient: "from-emerald-500/20 to-green-500/20",
+              iconBg: "bg-gradient-to-br from-emerald-500 to-green-500",
+              glowColor: "shadow-emerald-500/50",
             },
             {
               icon: (
-                <Bell className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                <Bell className="h-7 w-7 text-orange-400" />
               ),
               label: "Pending Requests",
               value: incomingrequest?.length,
-              bg: "bg-orange-50 dark:bg-orange-950",
-              iconWrapper: "p-3 rounded-xl",
+              gradient: "from-orange-500/20 to-pink-500/20",
+              iconBg: "bg-gradient-to-br from-orange-500 to-pink-500",
+              glowColor: "shadow-orange-500/50",
             },
-          ]?.map(({ icon, label, value, bg, iconWrapper }, idx) => (
-            <Card key={idx} className="bg-card border-border shadow-lg w-full">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  <div className={`${bg} ${iconWrapper}`}>{icon}</div>
+          ]?.map(({ icon, label, value, gradient, iconBg, glowColor }, idx) => (
+            <Card key={idx} className={`bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl ${glowColor} hover:shadow-3xl hover:scale-105 transition-all duration-300 w-full overflow-hidden group`}>
+              <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+              <CardContent className="p-6 relative">
+                <div className="flex items-center space-x-5">
+                  <div className={`${iconBg} p-4 rounded-2xl shadow-xl ${glowColor} group-hover:scale-110 transition-transform duration-300`}>
+                    {icon}
+                  </div>
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">
+                    <p className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
                       {label}
                     </p>
-                    <p className="text-2xl font-bold text-foreground">
+                    <p className="text-4xl font-black text-white mt-1 drop-shadow-lg">
                       {value}
                     </p>
                   </div>
@@ -665,29 +679,29 @@ const renderActionButton = (device) => {
             </Card>
           ))}
         </div>
-        <Card className="bg-card border-border shadow-xl w-full overflow-hidden rounded-lg mb-4 sm:mb-6">
-          <CardContent className="px-2 py-3 sm:px-4 sm:py-6">
-            <Tabs defaultValue="devices" className="space-y-3 sm:space-y-5">
-              <TabsList className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2 w-full h-auto">
+        <Card className="bg-white/10 backdrop-blur-2xl border-white/20 shadow-2xl w-full overflow-hidden rounded-2xl mb-4 sm:mb-6">
+          <CardContent className="px-3 py-4 sm:px-6 sm:py-8">
+            <Tabs defaultValue="devices" className="space-y-4 sm:space-y-6">
+              <TabsList className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 w-full h-auto bg-slate-900/50 p-2 rounded-xl backdrop-blur-xl border border-white/10">
                 <TabsTrigger
                   value="devices"
-                  className="flex items-center justify-center space-x-1 sm:space-x-2 text-xs sm:text-sm whitespace-nowrap py-2 px-2 sm:px-3"
+                  className="flex items-center justify-center space-x-2 text-sm sm:text-base font-semibold whitespace-nowrap py-3 px-4 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-blue-500/50 text-slate-300 hover:text-white transition-all duration-300"
                 >
-                  <Monitor className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <Monitor className="h-4 w-4 sm:h-5 sm:w-5" />
                   <span className="hidden xs:inline">Available Devices</span>
                   <span className="xs:hidden">Devices</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="connections"
-                  className="flex items-center justify-center space-x-1 sm:space-x-2 text-xs sm:text-sm whitespace-nowrap py-2 px-2 sm:px-3"
+                  className="flex items-center justify-center space-x-2 text-sm sm:text-base font-semibold whitespace-nowrap py-3 px-4 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-green-500 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-emerald-500/50 text-slate-300 hover:text-white transition-all duration-300"
                 >
-                  <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5" />
                   <span className="hidden xs:inline">Connected Devices</span>
                   <span className="xs:hidden">Active</span>
                   {connecteddevices?.length > 0 && (
                     <Badge
                       variant="secondary"
-                      className="ml-1 text-xs h-4 min-w-4 px-1"
+                      className="ml-1 bg-white/20 text-white text-xs h-5 min-w-5 px-2 font-bold"
                     >
                       {connecteddevices?.length}
                     </Badge>
@@ -695,15 +709,15 @@ const renderActionButton = (device) => {
                 </TabsTrigger>
                 <TabsTrigger
                   value="requests"
-                  className="flex items-center justify-center space-x-1 sm:space-x-2 text-xs sm:text-sm whitespace-nowrap py-2 px-2 sm:px-3"
+                  className="flex items-center justify-center space-x-2 text-sm sm:text-base font-semibold whitespace-nowrap py-3 px-4 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-pink-500 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-orange-500/50 text-slate-300 hover:text-white transition-all duration-300"
                 >
-                  <Bell className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
                   <span className="hidden xs:inline">Incoming Requests</span>
                   <span className="xs:hidden">Requests</span>
                   {incomingrequest?.length > 0 && (
                     <Badge
                       variant="secondary"
-                      className="ml-1 bg-orange-100 text-orange-800 text-xs h-4 min-w-4 px-1"
+                      className="ml-1 bg-orange-200 text-orange-900 text-xs h-5 min-w-5 px-2 font-bold animate-pulse"
                     >
                       {incomingrequest.length}
                     </Badge>
@@ -711,15 +725,15 @@ const renderActionButton = (device) => {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="devices" className="space-y-3 sm:space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 flex-wrap">
-                  <h3 className="text-base sm:text-lg font-semibold text-foreground">
+              <TabsContent value="devices" className="space-y-4 sm:space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 flex-wrap">
+                  <h3 className="text-xl sm:text-2xl font-bold text-white drop-shadow-lg">
                     Available Devices
                   </h3>
-                  <div className="flex items-center flex-wrap gap-2">
+                  <div className="flex items-center flex-wrap gap-3">
                     <Badge
                       variant="outline"
-                      className="text-muted-foreground text-xs"
+                      className="text-slate-300 border-white/30 bg-white/10 backdrop-blur-xl text-sm font-semibold px-3 py-1"
                     >
                       {devices?.length} devices
                     </Badge>
@@ -738,18 +752,24 @@ const renderActionButton = (device) => {
                 </div>
 
                 <ScrollArea className="max-h-[280px] sm:max-h-[350px] lg:max-h-[450px] pr-1 overflow-y-auto scrollbar-none">
-                  <div className="space-y-2 sm:space-y-3">
+                  <div className="space-y-3 sm:space-y-4">
                   {loading ? (
-  <div className="flex justify-center items-center w-full p-4">
-    <span className="text-white font-bold text-lg">Loading devices...</span>
+  <div className="flex flex-col justify-center items-center w-full py-16 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10">
+    <div className="inline-flex p-6 bg-gradient-to-br from-blue-500 to-purple-500 rounded-3xl mb-4 shadow-2xl animate-pulse">
+      <Monitor className="h-12 w-12 sm:h-16 sm:w-16 text-white" />
+    </div>
+    <span className="text-white font-bold text-xl sm:text-2xl mb-2">Loading devices...</span>
+    <p className="text-slate-400 font-medium">Please wait while we fetch your devices</p>
   </div>
 ) : displayDevices?.length === 0 ? (
-  <div className="text-center py-8 sm:py-12">
-    <Bell className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />
-    <h4 className="text-base sm:text-lg font-medium text-foreground mb-2">
+  <div className="text-center py-12 sm:py-16 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10">
+    <div className="inline-flex p-6 bg-gradient-to-br from-slate-700 to-slate-800 rounded-3xl mb-4 shadow-2xl">
+      <Monitor className="h-12 w-12 sm:h-16 sm:w-16 text-slate-400" />
+    </div>
+    <h4 className="text-xl sm:text-2xl font-bold text-white mb-3">
       No live connections
     </h4>
-    <p className="text-sm sm:text-base text-muted-foreground">
+    <p className="text-base sm:text-lg text-slate-400 font-medium">
       Live connections will appear here
     </p>
   </div>
@@ -757,28 +777,28 @@ const renderActionButton = (device) => {
   displayDevices.map((device) => (
     <div
       key={device.id}
-      className="flex flex-col sm:flex-row gap-3 p-3 sm:p-4 bg-muted/50 rounded-lg sm:rounded-xl border border-border hover:bg-muted/80 transition-all w-full"
+      className="flex flex-col sm:flex-row gap-4 p-4 sm:p-5 bg-white/5 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-white/10 hover:bg-white/10 hover:border-white/20 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 w-full group"
     >
-      <div className="flex items-start gap-3 w-full flex-1">
-        <div className="p-1.5 sm:p-2 bg-background rounded-lg flex-shrink-0">
-          <Monitor className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+      <div className="flex items-start gap-4 w-full flex-1">
+        <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex-shrink-0 shadow-lg shadow-blue-500/50 group-hover:scale-110 transition-transform duration-300">
+          <Monitor className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
         </div>
         <div className="flex-1 overflow-hidden min-w-0">
-          <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-1">
-            <h4 className="font-semibold text-sm sm:text-lg truncate">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <h4 className="font-bold text-base sm:text-xl text-white truncate drop-shadow-lg">
               {device.name}
             </h4>
             {getStatusIcon(device.status)}
             {getStatusBadge(device.status)}
           </div>
-          <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
-            <span>{device.os}</span>
+          <div className="flex flex-wrap items-center gap-2 text-sm sm:text-base text-slate-300 font-medium">
+            <span className="bg-slate-700/50 px-2 py-1 rounded-md">{device.os}</span>
             {device.hostname && (
-              <span className="hidden sm:inline">• {device.hostname}</span>
+              <span className="hidden sm:inline bg-slate-700/50 px-2 py-1 rounded-md">@ {device.hostname}</span>
             )}
             {device.lastSeen && (
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
+              <span className="flex items-center gap-1 bg-slate-700/50 px-2 py-1 rounded-md">
+                <Clock className="h-4 w-4" />
                 <span className="truncate">{device.lastSeen}</span>
               </span>
             )}
@@ -798,44 +818,44 @@ const renderActionButton = (device) => {
 
              <TabsContent
                 value="connections"
-                className="space-y-3 sm:space-y-4"
+                className="space-y-4 sm:space-y-5"
               >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 flex-wrap">
-                  <h3 className="text-base sm:text-lg font-semibold text-foreground">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 flex-wrap">
+                  <h3 className="text-xl sm:text-2xl font-bold text-white drop-shadow-lg">
                     Active Connections
                   </h3>
-                  <Badge variant="outline" className="text-emerald-600 text-xs">
+                  <Badge variant="outline" className="text-emerald-300 border-emerald-500/50 bg-emerald-500/20 backdrop-blur-xl text-sm font-bold px-3 py-1">
                     {connecteddevices?.length} active
                   </Badge>
                 </div>
 
                 {connecteddevices?.length > 0 ? (
                   <ScrollArea className="max-h-[280px] sm:max-h-[350px] lg:max-h-[450px] pr-1 overflow-y-auto scrollbar-none">
-                    <div className="space-y-2 sm:space-y-3">
+                    <div className="space-y-3 sm:space-y-4">
                       {connecteddevices?.map((device) => (
                         <div
                           key={device.id}
-                          className="flex flex-col sm:flex-row gap-3 p-3 sm:p-4 bg-muted/50 rounded-lg sm:rounded-xl border border-emerald-200 hover:bg-muted/80 w-full justify-center items-center"
+                          className="flex flex-col sm:flex-row gap-4 p-4 sm:p-5 bg-emerald-500/10 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-emerald-500/30 hover:bg-emerald-500/20 hover:border-emerald-400/50 hover:shadow-2xl hover:shadow-emerald-500/30 hover:scale-[1.02] transition-all duration-300 w-full group"
                         >
-                          <div className="flex items-start gap-3 w-full">
-                            <div className="p-1.5 sm:p-2 bg-emerald-50 dark:bg-emerald-950 rounded-lg flex-shrink-0">
-                              <Monitor className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 dark:text-emerald-400" />
+                          <div className="flex items-start gap-4 w-full">
+                            <div className="p-3 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl flex-shrink-0 shadow-xl shadow-emerald-500/50 group-hover:scale-110 transition-transform duration-300">
+                              <Monitor className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                             </div>
                             <div className="flex-1 overflow-hidden min-w-0">
-                              <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-1">
-                                <h4 className="font-semibold text-sm sm:text-lg truncate">
+                              <div className="flex flex-wrap items-center gap-2 mb-2">
+                                <h4 className="font-bold text-base sm:text-xl truncate text-white drop-shadow-lg">
                                   {device.name}
                                 </h4>
-                                <Wifi className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-600" />
-                                <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs">
+                                <Wifi className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-400 animate-pulse" />
+                                <Badge className="bg-emerald-400 text-emerald-950 border-0 font-bold text-xs px-3 py-1 shadow-lg shadow-emerald-400/50">
                                   Connected
                                 </Badge>
                               </div>
-                              <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
-                                <span>{device.os}</span>
+                              <div className="flex flex-wrap items-center gap-2 text-sm sm:text-base text-slate-300 font-medium">
+                                <span className="bg-emerald-900/30 px-2 py-1 rounded-md">{device.os}</span>
                                 {device.hostname && (
-                                  <span className="hidden sm:inline">
-                                    • {device.hostname}
+                                  <span className="hidden sm:inline bg-emerald-900/30 px-2 py-1 rounded-md">
+                                    @ {device.hostname}
                                   </span>
                                 )}
                               </div>
@@ -843,34 +863,36 @@ const renderActionButton = (device) => {
                           </div>
                           <Button
                             onClick={() => handleAccessDevice(device.id)}
-                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-8 sm:h-9 text-xs sm:text-sm w-40"
+                            className="w-full sm:w-40 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white h-10 sm:h-11 text-sm sm:text-base font-bold shadow-xl shadow-emerald-500/50 hover:shadow-2xl hover:scale-105 transition-all duration-300"
                           >
                             Access{" "}
-                            <ChevronRight className="ml-1 h-3 w-3 sm:h-4 sm:w-4" />
+                            <ChevronRight className="ml-1 h-4 w-4 sm:h-5 sm:w-5" />
                           </Button>
                         </div>
                       ))}
                     </div>
                   </ScrollArea>
                 ) : (
-                  <div className="text-center py-8 sm:py-12">
-                    <Users className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />
-                    <h4 className="text-base sm:text-lg font-medium text-foreground mb-2">
+                  <div className="text-center py-12 sm:py-16 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10">
+                    <div className="inline-flex p-6 bg-gradient-to-br from-slate-700 to-slate-800 rounded-3xl mb-4 shadow-2xl">
+                      <Users className="h-12 w-12 sm:h-16 sm:w-16 text-slate-400" />
+                    </div>
+                    <h4 className="text-xl sm:text-2xl font-bold text-white mb-2">
                       No Active Connections
                     </h4>
-                    <p className="text-sm sm:text-base text-muted-foreground">
+                    <p className="text-base sm:text-lg text-slate-400 font-medium">
                       Connect to devices to see them here
                     </p>
                   </div>
                 )}
               </TabsContent>
 
-              <TabsContent value="requests" className="space-y-3 sm:space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 flex-wrap">
-                  <h3 className="text-base sm:text-lg font-semibold text-foreground">
+              <TabsContent value="requests" className="space-y-4 sm:space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 flex-wrap">
+                  <h3 className="text-xl sm:text-2xl font-bold text-white drop-shadow-lg">
                     Incoming Requests
                   </h3>
-                  <Badge variant="outline" className="text-orange-600 text-xs">
+                  <Badge variant="outline" className="text-orange-300 border-orange-500/50 bg-orange-500/20 backdrop-blur-xl text-sm font-bold px-3 py-1 animate-pulse">
                     {incomingrequest?.length} pending
                   </Badge>
                 </div>
@@ -881,44 +903,41 @@ const renderActionButton = (device) => {
       {incomingrequest.map((device) => (
         <div
           key={device.id}
-          className="flex flex-col sm:flex-row gap-3 p-3 sm:p-4 bg-muted/50 rounded-lg sm:rounded-xl border border-emerald-200 hover:bg-muted/80 w-full justify-between items-center"
+          className="flex flex-col sm:flex-row gap-4 p-4 sm:p-5 bg-orange-500/10 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-orange-500/30 hover:bg-orange-500/20 hover:border-orange-400/50 hover:shadow-2xl hover:shadow-orange-500/30 hover:scale-[1.02] transition-all duration-300 w-full group"
         >
-          <div className="flex items-start gap-3 w-full flex-1">
-            <div className="p-1.5 sm:p-2 bg-emerald-50 dark:bg-emerald-950 rounded-lg flex-shrink-0">
-              <Monitor className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 dark:text-emerald-400" />
+          <div className="flex items-start gap-4 w-full flex-1">
+            <div className="p-3 bg-gradient-to-br from-orange-500 to-pink-500 rounded-xl flex-shrink-0 shadow-xl shadow-orange-500/50 group-hover:scale-110 transition-transform duration-300">
+              <Monitor className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
 
      <div className="flex-1 overflow-hidden min-w-0">
-  <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-1">
-    <h4 className="font-semibold text-sm sm:text-lg truncate">
+  <div className="flex flex-wrap items-center gap-2 mb-2">
+    <h4 className="font-bold text-base sm:text-xl truncate text-white drop-shadow-lg">
       {device.name || device.senderInfo?.name || "Unknown Requester"}
     </h4>
 
     {device.status === "online" && (
-      <Wifi className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-600" />
+      <Wifi className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-400 animate-pulse" />
     )}
 
-    <Badge className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs">
+    <Badge className="bg-yellow-400 text-yellow-950 border-0 font-bold text-xs px-3 py-1 shadow-lg shadow-yellow-400/50 animate-pulse">
       Incoming Request
     </Badge>
   </div>
 
-  <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
-    {device.os && <span>{device.os}</span>}
+  <div className="flex flex-wrap items-center gap-2 text-sm sm:text-base text-slate-300 font-medium">
+    {device.os && <span className="bg-orange-900/30 px-2 py-1 rounded-md">{device.os}</span>}
     {device.hostname && (
-      <span className="hidden sm:inline">• {device.hostname}</span>
+      <span className="hidden sm:inline bg-orange-900/30 px-2 py-1 rounded-md">@ {device.hostname}</span>
     )}
-    {/* {!device.os && !device.hostname && (
-      <span>Offline Device</span>
-    )} */}
   </div>
 
   {(device.senderInfo || device.email) && (
-    <div className="mt-2 text-xs sm:text-sm text-foreground">
-      <p className="font-medium">
+    <div className="mt-3 p-3 bg-white/5 rounded-lg border border-white/10">
+      <p className="font-bold text-white text-sm sm:text-base">
         Request from: {device.senderInfo?.name || device.name || "Unknown"}
       </p>
-      <p className="text-muted-foreground">
+      <p className="text-slate-400 text-xs sm:text-sm mt-1">
         {device.senderInfo?.email || device.email || "No email"}
       </p>
     </div>
@@ -927,16 +946,16 @@ const renderActionButton = (device) => {
 
           </div>
 
-          <div className="flex flex-col gap-2 sm:gap-2 sm:items-end w-full sm:w-auto sm:ml-4">
+          <div className="flex flex-col gap-3 sm:gap-3 sm:items-end w-full sm:w-auto sm:ml-4">
             <Button
               onClick={() => handleAcceptRequest(device.id)}
-              className="w-full sm:w-32 bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm h-8"
+              className="w-full sm:w-36 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white text-sm sm:text-base font-bold h-10 shadow-xl shadow-emerald-500/50 hover:shadow-2xl hover:scale-105 transition-all duration-300"
             >
               Accept
             </Button>
             <Button
               onClick={() => handleRejectRequest(device.id,device.email)}
-              className="w-full sm:w-32 bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm h-8"
+              className="w-full sm:w-36 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white text-sm sm:text-base font-bold h-10 shadow-xl shadow-red-500/50 hover:shadow-2xl hover:scale-105 transition-all duration-300"
             >
               Reject
             </Button>
@@ -946,12 +965,14 @@ const renderActionButton = (device) => {
     </div>
   </ScrollArea>
 ) : (
-                  <div className="text-center py-8 sm:py-12">
-                    <Bell className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />
-                    <h4 className="text-base sm:text-lg font-medium text-foreground mb-2">
+                  <div className="text-center py-12 sm:py-16 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10">
+                    <div className="inline-flex p-6 bg-gradient-to-br from-slate-700 to-slate-800 rounded-3xl mb-4 shadow-2xl">
+                      <Bell className="h-12 w-12 sm:h-16 sm:w-16 text-slate-400" />
+                    </div>
+                    <h4 className="text-xl sm:text-2xl font-bold text-white mb-2">
                       No Pending Requests
                     </h4>
-                    <p className="text-sm sm:text-base text-muted-foreground">
+                    <p className="text-base sm:text-lg text-slate-400 font-medium">
                       Access requests will appear here
                     </p>
                   </div>
