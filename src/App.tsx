@@ -81,6 +81,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { Toaster } from '@/components/ui/toaster';
 import { jwtDecode } from 'jwt-decode';
 import Index from '@/pages/Index';
+import Landing from '@/pages/Landing';
 import Login from '@/pages/Login';
 import Signup from '@/pages/Signup';
 import Dashboard from '@/pages/Dashboard';
@@ -115,7 +116,7 @@ function App() {
   const { isAuthenticated, setIsAuthenticated } = useAuthStore();
   const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
+  const checkAuth = () => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const token = user?.token;
 
@@ -125,8 +126,19 @@ function App() {
       localStorage.removeItem('user');
       setIsAuthenticated(false);
     }
+  };
 
+  useEffect(() => {
+    checkAuth();
     setLoading(false);
+
+    // Listen for localStorage changes (for logout from other tabs)
+    const handleStorageChange = () => {
+      checkAuth();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, [setIsAuthenticated]);
 
   if (loading) {
@@ -138,7 +150,7 @@ function App() {
       <Router>
         <div className="App app">
           <Routes>
-            <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Index />} />
+            <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Landing />} />
             <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/dashboard" />} />
             <Route path="/signup" element={!isAuthenticated ? <Signup /> : <Navigate to="/dashboard" />} />
             <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />

@@ -389,7 +389,7 @@ setIsAuthenticated(false)
       description: "You have been successfully logged out.",
     });
 
-    navigate("/login");
+    navigate("/");
   } catch (error) {
     toast({
       title: "Logout failed",
@@ -442,78 +442,77 @@ setIsAuthenticated(false)
 
   if (!agentDownloaded) {
     return (
-      <Sidebar>
-        <div className="max-w-2xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="w-full max-w-2xl">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl mb-6 mx-auto shadow-xl">
+              <Monitor className="h-10 w-10 text-white" />
+            </div>
+            <h1 className="text-4xl font-bold text-slate-900 mb-2">Download Remote Agent</h1>
+            <p className="text-lg text-slate-600">Install our secure agent to start managing your devices remotely</p>
+          </div>
+
           <Card className="border-2 border-blue-200 shadow-xl">
-            <CardHeader className="text-center pb-6">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl mb-4 mx-auto shadow-lg">
-                <Download className="h-10 w-10 text-white" />
-              </div>
-              <CardTitle className="text-2xl font-bold text-slate-900">
-                Download Remote Agent
-              </CardTitle>
-              <CardDescription className="text-base text-slate-600 mt-2">
-                Install our secure agent to start managing your devices remotely
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center px-6">
+            <CardContent className="p-8">
               {downloadInitiated ? (
-                <div className="space-y-4">
-                  <div className="flex flex-col items-center space-y-3">
-                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                      <Download className="w-8 h-8 text-green-600" />
+                <div className="space-y-6 text-center">
+                  <div className="flex flex-col items-center space-y-4">
+                    <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
+                      <Download className="h-10 w-10 text-green-600" />
                     </div>
                     <div>
-                      <p className="text-lg font-semibold text-green-700">
+                      <h2 className="text-2xl font-bold text-green-700 mb-2">
                         Agent Downloaded Successfully
-                      </p>
-                      <p className="text-sm text-slate-600 mt-2">
-                        Please <strong className="text-green-700">run the downloaded agent</strong> by double-clicking the <code className="bg-slate-100 px-2 py-1 rounded">launch-luma-agent.bat</code> file
+                      </h2>
+                      <p className="text-slate-600">
+                        Please <strong className="text-green-700">run the downloaded agent</strong> by double-clicking the <code className="bg-slate-100 px-3 py-1 rounded">launch-luma-agent.bat</code> file
                       </p>
                     </div>
                   </div>
                   <Button
-                    variant="ghost"
                     onClick={skipped}
-                    className="text-blue-600 hover:text-blue-700"
+                    variant="outline"
+                    className="border-blue-300 text-blue-700 hover:bg-blue-50"
                   >
-                    Skip for now
+                    Continue to Dashboard
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 gap-3">
+                <div className="space-y-8">
+                  <div className="grid grid-cols-1 gap-4">
                     {[
                       "Secure encrypted connections",
                       "Cross-platform compatibility", 
                       "Real-time device monitoring",
+                      "Remote desktop control",
+                      "File access and management"
                     ].map((text, idx) => (
-                      <div key={idx} className="flex items-center justify-center space-x-2 text-slate-600">
-                        <div className="w-2 h-2 bg-blue-600 rounded-full" />
-                        <span className="text-sm">{text}</span>
+                      <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-slate-200">
+                        <div className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0" />
+                        <span className="text-slate-700">{text}</span>
                       </div>
                     ))}
                   </div>
                   <Button
                     onClick={handleDownloadAgent}
                     size="lg"
-                    className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg"
+                    className="w-full h-14 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-xl"
                   >
                     <Download className="mr-2 h-5 w-5" />
                     Download Agent
                   </Button>
-                  <div className="space-y-3">
-                    <p className="text-sm text-slate-600">
+                  <div className="space-y-4 text-center">
+                    <p className="text-slate-600">
                       Already downloaded? <strong className="text-blue-600">Run the agent</strong> to link your device!
                     </p>
                     <Button
                       variant="ghost"
                       onClick={skipped}
-                      className="text-sm text-slate-600 hover:text-slate-900"
+                      className="text-slate-600 hover:text-slate-900"
                     >
                       Skip for now
                     </Button>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-sm text-slate-500">
                       Compatible with Windows, macOS, and Linux
                     </p>
                   </div>
@@ -522,7 +521,7 @@ setIsAuthenticated(false)
             </CardContent>
           </Card>
         </div>
-      </Sidebar>
+      </div>
     );
   }
 const renderActionButton = (device) => {

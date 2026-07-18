@@ -13,6 +13,7 @@ import axios from 'axios'
 import Apiurl from './../api';
 import useAuthStore from '@/Zustandstore/useAuthstore';
 const Signup = () => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -20,6 +21,7 @@ const Signup = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ 
+    name?: string;
     email?: string; 
     password?: string; 
     confirmPassword?: string;
@@ -33,10 +35,17 @@ const Signup = () => {
 
   const validateForm = () => {
     const newErrors: { 
+      name?: string;
       email?: string; 
       password?: string; 
       confirmPassword?: string;
     } = {};
+    
+    if (!name) {
+      newErrors.name = 'Name is required';
+    } else if (name.length < 2) {
+      newErrors.name = 'Name must be at least 2 characters';
+    }
     
     if (!email) {
       newErrors.email = 'Email is required';
@@ -69,7 +78,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   try {
     const res = await axios.post(`${Apiurl}/api/auth/signup`, {
-      name: "James",
+      name,
       email,
       password,
     });
@@ -81,7 +90,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 setIsAuthenticated(true)
     toast({
       title: "Account created successfully!",
-      description: "Welcome to Remote Access Manager. You can now access your dashboard.",
+      description: `Welcome to Remote Access Manager, ${name}! You can now access your dashboard.`,
     });
 
     navigate("/dashboard");
@@ -129,6 +138,22 @@ setIsAuthenticated(true)
           
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-slate-700 font-medium">Full Name</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Enter your full name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className={`pl-10 h-12 ${errors.name ? 'border-red-500 focus:border-red-500' : 'border-slate-300 focus:border-blue-500'}`}
+                  />
+                </div>
+                {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-slate-700 font-medium">Email Address</Label>
                 <div className="relative">

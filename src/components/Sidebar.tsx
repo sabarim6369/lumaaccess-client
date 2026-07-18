@@ -60,7 +60,8 @@ const Sidebar = ({ children }: SidebarProps) => {
 
   const handleLogout = () => {
     localStorage.removeItem("user");
-    navigate('/login');
+    localStorage.removeItem("skip");
+    window.location.href = '/';
   };
 
   const isActive = (path: string) => {
