@@ -28,7 +28,8 @@ import {
   Eye,
   Trash2,
   Copy,
-  Edit
+  Edit,
+  X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -38,6 +39,7 @@ import { useToast } from '@/hooks/use-toast';
 import { mockDevices, Device } from '@/lib/auth';
 import axios from 'axios';
 import Apiurl from './../api';
+import Sidebar from "@/components/Sidebar";
 const DeviceAccess = () => {
   const [searchParams] = useSearchParams();
   const deviceId = searchParams.get('device');
@@ -205,50 +207,47 @@ const filteredActions = controlActions.filter((action) => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center space-x-4 mb-8">
+    <Sidebar>
+      <div className="space-y-8">
+        {/* Header */}
+        <div className="flex items-center gap-4">
           <Button 
             variant="outline" 
             onClick={() => navigate('/dashboard')}
-            className="flex items-center space-x-2"
+            className="border-slate-300"
           >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Back to Dashboard</span>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
           </Button>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">{device.name}</h1>
+            <p className="text-slate-600">Remote device access and control</p>
+          </div>
         </div>
 
-        {/* Device Information Header */}
-        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl mb-8">
+        {/* Device Info Card */}
+        <Card className="border-2 border-slate-200 shadow-sm">
           <CardHeader>
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-              <div className="flex items-center space-x-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
                 <div className="p-3 bg-blue-100 rounded-xl">
-                  <Monitor className="h-8 w-8 text-blue-600" />
+                  <Monitor className="h-6 w-6 text-blue-600" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl font-bold text-slate-800">{device.name}</CardTitle>
-                  <p className="text-slate-600 mt-1">Remote device access and control</p>
+                  <CardTitle className="text-xl font-bold text-slate-900">{device.name}</CardTitle>
+                  <p className="text-sm text-slate-600 mt-1">Remote device access</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  {isConnected ? (
-                    <>
-                      <Wifi className="h-5 w-5 text-emerald-600" />
-                      <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200">Connected</Badge>
-                    </>
-                  ) : (
-                    <>
-                      <WifiOff className="h-5 w-5 text-red-600" />
-                      <Badge variant="secondary" className="bg-red-100 text-red-800 border-red-200">Disconnected</Badge>
-                    </>
-                  )}
-                </div>
+              <div className="flex items-center gap-3">
+                {isConnected ? (
+                  <Badge className="bg-emerald-100 text-emerald-700 border-0">Connected</Badge>
+                ) : (
+                  <Badge variant="secondary" className="bg-red-100 text-red-700 border-0">Disconnected</Badge>
+                )}
                 <Button 
                   onClick={handleDisconnect}
-                  variant="outline"
-                  className="border-red-200 text-red-700 hover:bg-red-50"
+                  variant="destructive"
+                  size="sm"
                   disabled={!isConnected}
                 >
                   Disconnect
@@ -258,81 +257,44 @@ const filteredActions = controlActions.filter((action) => {
           </CardHeader>
           
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div className="text-center">
-                <p className="text-sm text-slate-600 mb-1">Hostname</p>
-                <p className="font-semibold text-slate-800">{device.hostname}</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="p-3 bg-slate-50 rounded-lg">
+                <p className="text-xs text-slate-600 mb-1">Hostname</p>
+                <p className="font-semibold text-slate-900 text-sm">{device.hostname}</p>
               </div>
-              <div className="text-center">
-                <p className="text-sm text-slate-600 mb-1">Operating System</p>
-                <p className="font-semibold text-slate-800">{device.os}</p>
+              <div className="p-3 bg-slate-50 rounded-lg">
+                <p className="text-xs text-slate-600 mb-1">Operating System</p>
+                <p className="font-semibold text-slate-900 text-sm">{device.os}</p>
               </div>
-              <div className="text-center">
-                <p className="text-sm text-slate-600 mb-1">Status</p>
-                <p className="font-semibold text-slate-800 capitalize">{device.status}</p>
+              <div className="p-3 bg-slate-50 rounded-lg">
+                <p className="text-xs text-slate-600 mb-1">Status</p>
+                <p className="font-semibold text-slate-900 text-sm capitalize">{device.status}</p>
               </div>
-              <div className="text-center">
-                <p className="text-sm text-slate-600 mb-1">Last Seen</p>
-                <p className="font-semibold text-slate-800">{device.lastSeen}</p>
-              </div>
-            </div>
-
-            <Separator className="my-6" />
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="flex items-center space-x-3">
-                <Activity className="h-5 w-5 text-blue-600" />
-                <div>
-                  <p className="text-sm text-slate-600">CPU Usage</p>
-                  <div className="flex items-center space-x-2 mt-1">
-                    <div className="w-24 h-2 bg-slate-200 rounded-full">
-                      <div className="w-1/3 h-2 bg-blue-500 rounded-full"></div>
-                    </div>
-                    <span className="text-sm font-medium text-slate-800">32%</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <HardDrive className="h-5 w-5 text-emerald-600" />
-                <div>
-                  <p className="text-sm text-slate-600">Memory</p>
-                  <div className="flex items-center space-x-2 mt-1">
-                    <div className="w-24 h-2 bg-slate-200 rounded-full">
-                      <div className="w-1/2 h-2 bg-emerald-500 rounded-full"></div>
-                    </div>
-                    <span className="text-sm font-medium text-slate-800">48%</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <Clock className="h-5 w-5 text-orange-600" />
-                <div>
-                  <p className="text-sm text-slate-600">Uptime</p>
-                  <p className="text-sm font-medium text-slate-800 mt-1">2 days, 14 hours</p>
-                </div>
+              <div className="p-3 bg-slate-50 rounded-lg">
+                <p className="text-xs text-slate-600 mb-1">Last Seen</p>
+                <p className="font-semibold text-slate-900 text-sm">{device.lastSeen}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
+        {/* Device Controls */}
+        <Card className="border-2 border-slate-200 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-xl font-bold text-slate-800">Device Controls</CardTitle>
-            <p className="text-slate-600">Select an action to perform on the connected device</p>
+            <CardTitle className="text-xl font-bold text-slate-900">Device Controls</CardTitle>
+            <p className="text-slate-600 text-sm">Select an action to perform on the connected device</p>
           </CardHeader>
           
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {filteredActions.map((action) => (
                 <Button
                   key={action.name}
                   onClick={() => handleCommand(action.name)}
-                  className={`${action.color} text-white h-auto p-4 flex flex-col items-center space-y-2 hover:scale-105 transition-all duration-200 shadow-lg`}
+                  className={`${action.color} text-white h-auto p-4 flex flex-col items-center gap-2 hover:opacity-90 transition-all`}
                   disabled={!isConnected}
                 >
-                  <action.icon className="h-6 w-6" />
+                  <action.icon className="h-5 w-5" />
                   <span className="font-medium text-sm">{action.name}</span>
                   <span className="text-xs opacity-90 text-center">{action.description}</span>
                 </Button>
@@ -340,42 +302,46 @@ const filteredActions = controlActions.filter((action) => {
             </div>
 
             {!isConnected && (
-              <div className="mt-8 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-800 font-medium">Connection Lost</p>
-                <p className="text-red-600 text-sm mt-1">
-                  The connection to {device.name} has been lost. You will be redirected to the dashboard.
+              <div className="mt-6 p-4 bg-red-50 border-2 border-red-200 rounded-lg">
+                <p className="text-red-900 font-medium">Connection Lost</p>
+                <p className="text-red-700 text-sm mt-1">
+                  The connection to {device.name} has been lost.
                 </p>
               </div>
             )}
           </CardContent>
         </Card>
       </div>
+
+      {/* Screen Share Popup */}
       {showScreenPopup && (
-  <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex justify-center items-center">
-    <div className="bg-white p-6 rounded-lg max-w-4xl w-full shadow-xl relative">
-      <button
-        className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
-        onClick={() => {
-    setShowScreenPopup(false);
-    setIsScreenSharing(false); // stop the interval
-  }}
-      >
-        ✕
-      </button>
-      <h2 className="text-2xl font-semibold mb-4">Live Screen</h2>
-      {firstimage ? (
-        <img
-          src={`data:image/png;base64,${firstimage}`}
-          alt="Screen Share"
-          className="w-full h-auto rounded border"
-        />
-      ) : (
-        <p className="text-gray-600">Loading screen...</p>
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl p-6 relative">
+            <button
+              className="absolute top-4 right-4 text-slate-500 hover:text-slate-900 transition"
+              onClick={() => {
+                setShowScreenPopup(false);
+                setIsScreenSharing(false);
+              }}
+            >
+              <X className="h-6 w-6" />
+            </button>
+            <h2 className="text-2xl font-bold text-slate-900 mb-4">Live Screen</h2>
+            {firstimage ? (
+              <img
+                src={`data:image/png;base64,${firstimage}`}
+                alt="Screen Share"
+                className="w-full h-auto rounded-lg border-2 border-slate-200"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-64 bg-slate-100 rounded-lg">
+                <p className="text-slate-600">Loading screen...</p>
+              </div>
+            )}
+          </div>
+        </div>
       )}
-    </div>
-  </div>
-)}
-    </div>
+    </Sidebar>
   );
 };
 
