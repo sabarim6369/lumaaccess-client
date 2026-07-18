@@ -16,31 +16,45 @@ function Chatbot() {
       const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer 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`,
+          Authorization: `Bearer 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`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'llama3-8b-8192',
+          model: 'llama-3.1-8b-instant',
           messages: [
-            { role: 'system', content: `
-                
-                  You are an assistant specialized in LumaAccess — a remote device access and control system.
-  You help users with questions about how to use LumaAccess, features, troubleshooting, device access requests, and security.
-  Provide clear, helpful, and concise answers only related to LumaAccess.
-  If the question is unrelated, politely say you can only help with LumaAccess topics.
-
-            ` },
+            { role: 'system', content: 'You are an assistant specialized in LumaAccess — a remote device access and control system. You help users with questions about how to use LumaAccess, features, troubleshooting, device access requests, and security. Provide clear, helpful, and concise answers only related to LumaAccess. If the question is unrelated, politely say you can only help with LumaAccess topics.' },
             ...messages,
             userMessage,
           ],
         }),
       });
 
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('API Response Error:', res.status, errorText);
+        setMessages((prev) => [...prev, { role: 'assistant', content: `API Error (${res.status}): Please check your connection and try again.` }]);
+        return;
+      }
+
       const data = await res.json();
+      
+      if (data.error) {
+        console.error('API Error:', data.error);
+        setMessages((prev) => [...prev, { role: 'assistant', content: `Error: ${data.error.message || 'Unknown error'}` }]);
+        return;
+      }
+      
+      if (!data.choices || data.choices.length === 0) {
+        console.error('No response from API');
+        setMessages((prev) => [...prev, { role: 'assistant', content: 'No response generated. Please try again.' }]);
+        return;
+      }
+      
       const botMessage = data.choices[0].message;
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
       console.error('Error sending message:', error);
+      setMessages((prev) => [...prev, { role: 'assistant', content: 'Network error: Please check your connection and try again.' }]);
     }
   };
 

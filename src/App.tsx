@@ -164,9 +164,9 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Toaster />
+          {isAuthenticated && <Chatbot/>}
         </div>
       </Router>
-      <Chatbot/>
     </AuthProvider>
   );
 }
